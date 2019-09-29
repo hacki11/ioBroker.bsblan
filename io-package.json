@@ -1,0 +1,75 @@
+{
+    "common": {
+        "name": "bsblan",
+        "version": "0.0.1",
+        "news": {
+            "0.0.1": {
+                "en": "initial release",
+                "de": "Erstveröffentlichung",
+                "ru": "Начальная версия",
+                "pt": "lançamento inicial",
+                "nl": "Eerste uitgave",
+                "fr": "Première version",
+                "it": "Versione iniziale",
+                "es": "Versión inicial",
+                "pl": "Pierwsze wydanie",
+                "zh-cn": "首次出版"
+            }
+        },
+        "title": "BSB LAN",
+        "titleLang": {
+            "en": "BSB LAN",
+            "de": "BSB LAN",
+            "ru": "BSB LAN",
+            "pt": "BSB LAN",
+            "nl": "BSB LAN",
+            "fr": "BSB LAN",
+            "it": "LAN BSB",
+            "es": "BSB LAN",
+            "pl": "BSB LAN",
+            "zh-cn": "BSB局域网"
+        },
+        "desc": {
+            "en": "bsblan",
+            "de": "bsblan",
+            "ru": "bsblan",
+            "pt": "bsblan",
+            "nl": "bsblan",
+            "fr": "bsblan",
+            "it": "bsblan",
+            "es": "bsblan",
+            "pl": "bsblan",
+            "zh-cn": "bsblan"
+        },
+        "authors": [
+            "hacki11 <jur.schmid@gmail.com>"
+        ],
+        "keywords": [
+            "broetje gas heizung bsb lan"
+        ],
+        "license": "MIT",
+        "platform": "Javascript/Node.js",
+        "main": "main.js",
+        "icon": "bsblan.png",
+        "enabled": true,
+        "extIcon": "https://raw.githubusercontent.com/hacki11/ioBroker.bsblan/master/admin/bsblan.png",
+        "readme": "https://github.com/hacki11/ioBroker.bsblan/blob/master/README.md",
+        "loglevel": "info",
+        "mode": "daemon",
+        "type": "climate-control",
+        "compact": true,
+        "materialize": true,
+        "dependencies": [
+            {
+                "js-controller": ">=1.4.2"
+            }
+        ]
+    },
+    "native": {
+        "host": "",
+        "port": "80",
+        "interval": "60"
+    },
+    "objects": [],
+    "instanceObjects": []
+}
