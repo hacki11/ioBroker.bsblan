@@ -125,7 +125,9 @@ class Bsblan extends utils.Adapter {
     }
 
     parseUnit(unit) {
-        return unit.replace("&deg;", "°");
+        return unit
+            .replace("&deg;", "°")
+            .replace("&#037;", "%");
     }
 
     errorHandler(error) {
