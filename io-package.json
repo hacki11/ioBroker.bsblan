@@ -67,7 +67,9 @@
     },
     "native": {
         "host": "",
-        "port": "80",
+        "user": "",
+        "password": "",
+        "values": "700",
         "interval": "60"
     },
     "objects": [],

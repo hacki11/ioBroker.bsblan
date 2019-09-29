@@ -8,8 +8,7 @@
 // you need to create an adapter
 const utils = require("@iobroker/adapter-core");
 
-// Load your modules here, e.g.:
-// const fs = require("fs");
+const rp = require('request-promise');
 
 class Bsblan extends utils.Adapter {
 
@@ -33,52 +32,106 @@ class Bsblan extends utils.Adapter {
      */
     async onReady() {
         // Initialize your adapter here
+        // setup timer
+        this.interval = this.config.interval || 60;
+        this.interval *= 1000;
+        if (this.interval < 10000)
+            this.interval = 10000;
 
-        // The adapters config (in the instance object everything under the attribute "native") is accessible via
-        // this.config:
-        this.log.info("config option1: " + this.config.option1);
-        this.log.info("config option2: " + this.config.option2);
-
-        /*
-        For every state in the system there has to be also an object of type state
-        Here a simple template for a boolean variable named "testVariable"
-        Because every adapter instance uses its own unique namespace variable names can't collide with other adapters variables
-        */
-        await this.setObjectAsync("testVariable", {
-            type: "state",
-            common: {
-                name: "testVariable",
-                type: "boolean",
-                role: "indicator",
-                read: true,
-                write: true,
-            },
-            native: {},
-        });
+        if(this.config.user && this.config.password) {
+            this.auth = { 'Authorization': "Basic " + Buffer.from(this.config.user + ":" + this.config.password).toString('base64') }
+        } else {
+            this.auth = {}
+        }
 
         // in this template all states changes inside the adapters namespace are subscribed
         this.subscribeStates("*");
 
-        /*
-        setState examples
-        you will notice that each setState will cause the stateChange event to fire (because of above subscribeStates cmd)
-        */
-        // the variable testVariable is set to true as command (ack=false)
-        await this.setStateAsync("testVariable", true);
+        this.update();
+    }
 
-        // same thing, but the value is flagged "ack"
-        // ack should be always set to true if the value is received from or acknowledged from the target system
-        await this.setStateAsync("testVariable", { val: true, ack: true });
+    update() {
 
-        // same thing, but the state is deleted after 30s (getState will return null afterwards)
-        await this.setStateAsync("testVariable", { val: true, ack: true, expire: 30 });
+        var values = this.config.values.replace(/\s/g,'');
+        var options = {
+            uri: "http://" + this.config.host + "/JQ=" + values,
+            headers: this.auth,
+            json: true
+        };
 
-        // examples for the checkPassword/checkGroup functions
-        let result = await this.checkPasswordAsync("admin", "iobroker");
-        this.log.info("check user admin pw ioboker: " + result);
+        this.log.info(options.uri)
 
-        result = await this.checkGroupAsync("admin", "admin");
-        this.log.info("check group user admin group admin: " + result);
+        rp(options)
+            .then(result => this.setStates(result));
+
+        this.timer = setTimeout(() => this.update(), this.interval);
+    }
+
+    setStates(data) {
+        console.info(data);
+        for (let key of Object.keys(data)) {
+
+            let name = data[key].name.replace(".", "") + " (" + key + ")";
+            let value = this.parseValue(data[key].value, data[key].desc, data[key].dataType);
+
+            let obj = {
+                type: "state",
+                common: {
+                    name: name,
+                    type: this.mapType(data[key].dataType),
+                    role: "value",
+                    read: true,
+                    write: false,
+                    unit: this.parseUnit(data[key].unit),
+                },
+                native: {}
+            };
+            this.setObjectNotExists(name, obj, callback => {
+                this.setStateAsync(name, {val: value, ack: true})
+                    .catch((error) => this.errorHandler(error));
+            });
+        }
+    }
+
+    parseValue(value, desc, type) {
+        switch (type) {
+            case 1:
+                return value + " (" + desc + ")";
+            default:
+                return value;
+        }
+    }
+
+    mapType(type) {
+        // https://1coderookie.github.io/BSB-LPB-LAN/kap08.html#824-abrufen-und-steuern-mittels-json
+        switch (type) {
+            case 0:
+                return "number"; // number
+            case 1:
+                return "string"; // enum
+            case 2:
+                return "string"; // weekday
+            case 3:
+                return "number"; // hr/min
+            case 4:
+                return "string"; // date/time
+            case 5:
+                return "number"; // day/month
+            case 6:
+                return "string"; // string
+            default:
+                return "string";
+        }
+    }
+
+    parseUnit(unit) {
+        return unit.replace("&deg;", "°");
+    }
+
+    errorHandler(error) {
+        this.log.error(error.message);
+        if (error.stack)
+            this.log.error(error.stack);
     }
 
     /**
@@ -144,12 +197,16 @@ class Bsblan extends utils.Adapter {
 }
 
 // @ts-ignore parent is a valid property on module
-if (module.parent) {
+if (module
+
+    .parent
+) {
     // Export the constructor in compact mode
     /**
      * @param {Partial<ioBroker.AdapterOptions>} [options={}]
      */
-    module.exports = (options) => new Bsblan(options);
+    module
+        .exports = (options) => new Bsblan(options);
 } else {
     // otherwise start the instance directly
     new Bsblan();
