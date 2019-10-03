@@ -38,8 +38,8 @@ class Bsblan extends utils.Adapter {
         if (this.interval < 10000)
             this.interval = 10000;
 
-        if(this.config.user && this.config.password) {
-            this.auth = { 'Authorization': "Basic " + Buffer.from(this.config.user + ":" + this.config.password).toString('base64') }
+        if (this.config.user && this.config.password) {
+            this.auth = {'Authorization': "Basic " + Buffer.from(this.config.user + ":" + this.config.password).toString('base64')}
         } else {
             this.auth = {}
         }
@@ -47,24 +47,114 @@ class Bsblan extends utils.Adapter {
         // in this template all states changes inside the adapters namespace are subscribed
         this.subscribeStates("*");
 
+        this.valuesAsCSV = this.config.values.replace(/\s/g, '');
+        this.values = [...new Set(this.valuesAsCSV.split(","))].sort();
+
+
+        await //this.detectNewObjects(this.values)
+            //.then(newValues =>
+            this.initializeParameters(this.values);
+            // .catch((error) => this.errorHandler(error));
+
+
         this.update();
     }
 
+    async detectNewObjects(values) {
+        let newValues = [];
+        var promises = [];
+        for (let val of values) {
+            promises.push(this.getState(val, cb => {
+                if (!cb) return val;
+            }));
+        }
+        Promises.all(promises).then(() => {
+            return newValues;
+        });
+    }
+
+    initializeCategories() {
+        return rp(this.options("http://" + this.config.host + "/JK=ALL"))
+    }
+
+    async initializeParameters(values) {
+
+        if (!values || values.length == 0) return;
+
+        this.categories = await this.initializeCategories();
+
+        let fetch = new Set();
+
+        for (let value of values) {
+            for (let key of Object.keys(this.categories)) {
+                if (value >= this.categories[key]['min'] && value <= this.categories[key]['max']) {
+                    fetch.add(key);
+                    break;
+                }
+            }
+        }
+        this.log.info("Fetching categories");
+
+        let params = {};
+        for (let category of fetch) {
+            await rp(this.options("http://" + this.config.host + "/JK=" + category))
+                .then(result => Object.keys(result).forEach(k => params[k] = result[k]));
+        }
+
+        this.log.info(params);
+
+        for (let obj of values) {
+            await this.setupObject(obj, params[obj]);
+        }
+    }
+
+    async setupObject(key, param) {
+        let name = param.name.replace(".", "") + " (" + key + ")";
+
+        this.log.info("Add Parameter: " + name);
+
+        await rp(this.options("http://" + this.config.host + "/JQ=" + key))
+            .then(valueObject => {
+                let obj = {
+                    type: "state",
+                    common: {
+                        name: param.name,
+                        type: this.mapType(param.dataType),
+                        role: "value",
+                        read: true,
+                        write: false,
+                        unit: this.parseUnit(valueObject[key].unit),
+                        states: this.createObjectStates(param.possibleValues)
+                    },
+                    native: {}
+                };
+                this.setObjectNotExists(key, obj);
+                return valueObject.value;
+            })
+            .catch((error) => this.errorHandler(error));
+    }
+
+    createObjectStates(possibleValues) {
+        let states = {};
+        for (let entry of possibleValues) {
+            states[entry['enumValue']] = entry['desc']
+        }
+        return states;
+    }
+
     update() {
-
-        var values = this.config.values.replace(/\s/g,'');
-        var options = {
-            uri: "http://" + this.config.host + "/JQ=" + values,
-            headers: this.auth,
-            json: true
-        };
-
-        this.log.info(options.uri)
-
-        rp(options)
+        rp(this.options("http://" + this.config.host + "/JQ=" + this.valuesAsCSV))
             .then(result => this.setStates(result));
 
         this.timer = setTimeout(() => this.update(), this.interval);
+    }
+
+    options(uri) {
+        return {
+            uri: uri,
+            headers: this.auth,
+            json: true
+        };
     }
 
     setStates(data) {
@@ -72,7 +162,6 @@ class Bsblan extends utils.Adapter {
         for (let key of Object.keys(data)) {
 
             let name = data[key].name.replace(".", "") + " (" + key + ")";
-            let value = this.parseValue(data[key].value, data[key].desc, data[key].dataType);
 
             let obj = {
                 type: "state",
@@ -87,18 +176,9 @@ class Bsblan extends utils.Adapter {
                 native: {}
             };
             this.setObjectNotExists(name, obj, callback => {
-                this.setStateAsync(name, {val: value, ack: true})
+                this.setStateAsync(name, {val: data[key].value, ack: true})
                     .catch((error) => this.errorHandler(error));
             });
-        }
-    }
-
-    parseValue(value, desc, type) {
-        switch (type) {
-            case 1:
-                return value + " (" + desc + ")";
-            default:
-                return value;
         }
     }
 
