@@ -71,13 +71,12 @@ class Bsblan extends utils.Adapter {
         console.info(data);
         for (let key of Object.keys(data)) {
 
-            let name = data[key].name.replace(".", "") + " (" + key + ")";
             let value = this.parseValue(data[key].value, data[key].desc, data[key].dataType);
 
             let obj = {
                 type: "state",
                 common: {
-                    name: name,
+                    name: data[key].name.replace(".", "") + " (" + key + ")",
                     type: this.mapType(data[key].dataType),
                     role: "value",
                     read: true,
@@ -86,8 +85,9 @@ class Bsblan extends utils.Adapter {
                 },
                 native: {}
             };
-            this.setObjectNotExists(name, obj, callback => {
-                this.setStateAsync(name, {val: value, ack: true})
+            let id = key + "_" + data[key].name.replace(".", "");
+            this.setObjectNotExists(id, obj, callback => {
+                this.setStateAsync(id, {val: value, ack: true})
                     .catch((error) => this.errorHandler(error));
             });
         }
