@@ -38,11 +38,13 @@ class Bsblan extends utils.Adapter {
         if (this.interval < 10000)
             this.interval = 10000;
 
-        if(this.config.user && this.config.password) {
-            this.auth = { 'Authorization': "Basic " + Buffer.from(this.config.user + ":" + this.config.password).toString('base64') }
+        if (this.config.user && this.config.password) {
+            this.auth = {'Authorization': "Basic " + Buffer.from(this.config.user + ":" + this.config.password).toString('base64')}
         } else {
             this.auth = {}
         }
+
+        //this.values = this.resolveConfigValues();
 
         // in this template all states changes inside the adapters namespace are subscribed
         this.subscribeStates("*");
@@ -50,9 +52,20 @@ class Bsblan extends utils.Adapter {
         this.update();
     }
 
+    resolveConfigValues() {
+        let values = new Set();
+        for (let line of this.config.values.split(/\r?\n/)) {
+            for (let entry of line.split(",")) {
+                values.add(entry.trim());
+            }
+        }
+        console.log(values)
+        return values;
+    }
+
     update() {
 
-        var values = this.config.values.replace(/\s/g,'');
+        var values = this.config.values.replace(/\s/g, '');
         var options = {
             uri: "http://" + this.config.host + "/JQ=" + values,
             headers: this.auth,
