@@ -44,7 +44,7 @@ class Bsblan extends utils.Adapter {
             this.auth = {}
         }
 
-        //this.values = this.resolveConfigValues();
+        this.values = this.resolveConfigValues();
 
         // in this template all states changes inside the adapters namespace are subscribed
         this.subscribeStates("*");
@@ -56,7 +56,12 @@ class Bsblan extends utils.Adapter {
         let values = new Set();
         for (let line of this.config.values.split(/\r?\n/)) {
             for (let entry of line.split(",")) {
-                values.add(entry.trim());
+                let value = entry.trim();
+                if (isNaN(parseInt(value))) {
+                    this.log.error(value + " is not a valid id to retrieve.")
+                } else {
+                    values.add(entry.trim());
+                }
             }
         }
         console.log(values)
@@ -65,14 +70,13 @@ class Bsblan extends utils.Adapter {
 
     update() {
 
-        var values = this.config.values.replace(/\s/g, '');
         var options = {
-            uri: "http://" + this.config.host + "/JQ=" + values,
+            uri: "http://" + this.config.host + "/JQ=" + [...this.values].join(","),
             headers: this.auth,
             json: true
         };
 
-        this.log.info(options.uri)
+        this.log.info(options.uri);
 
         rp(options)
             .then(result => this.setStates(result));
