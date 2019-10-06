@@ -7,8 +7,7 @@
 // The adapter-core module gives you access to the core ioBroker functions
 // you need to create an adapter
 const utils = require("@iobroker/adapter-core");
-
-const rp = require('request-promise');
+const BSB = require('./lib/bsb');
 
 class Bsblan extends utils.Adapter {
 
@@ -38,15 +37,16 @@ class Bsblan extends utils.Adapter {
         if (this.interval < 10000)
             this.interval = 10000;
 
-        if (this.config.user && this.config.password) {
-            this.auth = {'Authorization': "Basic " + Buffer.from(this.config.user + ":" + this.config.password).toString('base64')}
-        } else {
-            this.auth = {}
-        }
+        this.bsb = new BSB(this.config.host, this.config.user, this.config.password);
 
         this.values = this.resolveConfigValues();
 
-        // in this template all states changes inside the adapters namespace are subscribed
+
+        // if (this.newValues.length !== 0) {
+        //     this.log.info("New values found: " + [...this.newValues].sort());
+        //     await this.initializeParameters(this.newValues);
+        // }
+        // // in this template all states changes inside the adapters namespace are subscribed
         this.subscribeStates("*");
 
         this.update();
@@ -64,82 +64,126 @@ class Bsblan extends utils.Adapter {
                 }
             }
         }
-        console.log(values)
-        return values;
+        let valuesArray = [...values].sort();
+        this.log.info("Values found: " + valuesArray)
+        return valuesArray;
     }
 
-    async detectNewObjects(values) {
-        let newValues = [];
-        var promises = [];
-        for (let val of values) {
-            promises.push(this.getState(val, cb => {
-                if (!cb) return val;
-            }));
-        }
-        Promises.all(promises).then(() => {
-            return newValues;
-        });
+    update() {
+
+        this.detectNewObjects(this.values)
+            .then(newValues => this.initializeParameters(newValues))
+            .then(() => this.connectionHandler(true))
+            .then(() => this.bsb.query(this.values))
+            .then(result => this.setStates(result))
+            .then(() => this.refreshTimer())
+            .catch((error) => {
+                this.errorHandler(error);
+                this.refreshTimer();
+            });
     }
 
-    initializeCategories() {
-        return rp(this.options("http://" + this.config.host + "/JK=ALL"))
+    refreshTimer() {
+        this.timer = setTimeout(() => this.update(), this.interval);
     }
 
     async initializeParameters(values) {
 
-        if (!values || values.length == 0) return;
+        if (!values || values.size == 0) return;
 
-        this.categories = await this.initializeCategories();
+        this.log.info("Setup new objects (" + [...values] + ") ...")
+        this.categories = await this.bsb.categories();
 
-        let fetch = new Set();
+        let categoryMap = {};
 
         for (let value of values) {
-            for (let key of Object.keys(this.categories)) {
-                if (value >= this.categories[key]['min'] && value <= this.categories[key]['max']) {
-                    fetch.add(key);
+            for (let category of Object.keys(this.categories)) {
+                if (value >= this.categories[category]['min'] && value <= this.categories[category]['max']) {
+                    var obj = {
+                        id: category,
+                        native: this.categories[category],
+                        values: []
+                    };
+                    if (!categoryMap[category]) {
+                        categoryMap[category] = obj;
+                    }
+                    categoryMap[category].values.push(value);
                     break;
                 }
             }
         }
-        this.log.info("Fetching categories");
 
-        let params = {};
-        for (let category of fetch) {
-            await rp(this.options("http://" + this.config.host + "/JK=" + category))
-                .then(result => Object.keys(result).forEach(k => params[k] = result[k]));
+        var values = await this.bsb.query(values);
+
+        // let params = {};
+        for (let category of Object.keys(categoryMap)) {
+            this.log.info("Fetching category " + category + " " + categoryMap[category].native.name + " ...")
+            await this.bsb.category(category)
+                .then(result => this.setupCategory(categoryMap[category], result, values));
         }
 
-        this.log.info(params);
+        this.log.info("Setup objects done.")
+    }
 
-        for (let obj of values) {
-            await this.setupObject(obj, params[obj]);
+    detectNewObjects(values) {
+
+        let newValues = new Set(values);
+        return this.getAdapterObjectsAsync()
+            .then(records => {
+                for (let key of Object.keys(records)) {
+                    let id = records[key].native.id;
+                    if (newValues.has(id)) {
+                        newValues.delete(id);
+                    }
+                }
+                return newValues;
+            });
+    }
+
+    setupCategory(category, params, values) {
+        var name = category.native['name'] + " (" + category.native['min'] + " - " + category.native['max'] + ")";
+        this.log.info("Setup category " + category.id + ": " + name);
+
+        for (let value of category.values) {
+            this.setupObject(value, params[value], values[value]);
         }
     }
 
-    async setupObject(key, param) {
-        let name = param.name.replace(".", "") + " (" + key + ")";
+    async setupObject(key, param, value) {
+        let name = param.name + " (" + key + ")";
 
         this.log.info("Add Parameter: " + name);
 
-        await rp(this.options("http://" + this.config.host + "/JQ=" + key))
-            .then(valueObject => {
-                let obj = {
-                    type: "state",
-                    common: {
-                        name: param.name,
-                        type: this.mapType(param.dataType),
-                        role: "value",
-                        read: true,
-                        write: false,
-                        unit: this.parseUnit(valueObject[key].unit),
-                        states: this.createObjectStates(param.possibleValues)
-                    },
-                    native: {}
-                };
-                this.setObjectNotExists(key, obj);
-                return valueObject.value;
-            })
+        let obj = {
+            type: "state",
+            common: {
+                name: name,
+                type: this.mapType(param.dataType),
+                role: "value",
+                read: true,
+                write: false,
+                unit: this.parseUnit(value.unit),
+                states: this.createObjectStates(param.possibleValues)
+            },
+            native: {
+                id: key,
+                bsb: param,
+            }
+        };
+        this.setObjectNotExistsAsync(this.createId(key, param.name), obj)
+            .then(this.setStateAsync(this.createId(key, param.name), {val: value.value, ack: true}))
             .catch((error) => this.errorHandler(error));
+    }
+
+    setStates(data) {
+        for (let key of Object.keys(data)) {
+            this.setStateAsync(this.createId(key, data[key].name), {val: data[key].value, ack: true})
+                .catch((error) => this.errorHandler(error));
+        }
+    }
+
+    createId(key, name) {
+        return name.replace(/\s/g, "_").replace(/\./g, "") + "_(" + key + ")";
     }
 
     createObjectStates(possibleValues) {
@@ -148,46 +192,6 @@ class Bsblan extends utils.Adapter {
             states[entry['enumValue']] = entry['desc']
         }
         return states;
-    }
-
-    update() {
-        rp(this.options("http://" + this.config.host + "/JQ=" + [...this.values].join(",")))
-            .then(result => this.setStates(result));
-
-        this.timer = setTimeout(() => this.update(), this.interval);
-    }
-
-    options(uri) {
-        return {
-            uri: uri,
-            headers: this.auth,
-            json: true
-        };
-    }
-
-    setStates(data) {
-        console.info(data);
-        for (let key of Object.keys(data)) {
-
-            let name = data[key].name.replace(".", "") + " (" + key + ")";
-
-            let obj = {
-                type: "state",
-                common: {
-                    name: name,
-                    type: this.mapType(data[key].dataType),
-                    role: "value",
-                    read: true,
-                    write: false,
-                    unit: this.parseUnit(data[key].unit),
-                },
-                native: {}
-            };
-            this.setObjectNotExists(name, obj, callback => {
-                this.setStateAsync(name, {val: data[key].value, ack: true})
-                    .catch((error) => this.errorHandler(error));
-            });
-        }
     }
 
     mapType(type) {
@@ -222,6 +226,19 @@ class Bsblan extends utils.Adapter {
         this.log.error(error.message);
         if (error.stack)
             this.log.error(error.stack);
+        this.connectionHandler(false);
+    }
+
+    connectionHandler(connected) {
+        if (this.connection !== connected) {
+            this.connection = connected;
+            if (connected)
+                this.log.info("Connection established successfully");
+            else
+                this.log.error("Connection failed");
+
+            this.setState("info.connection", this.connection);
+        }
     }
 
     /**
@@ -245,7 +262,7 @@ class Bsblan extends utils.Adapter {
     onObjectChange(id, obj) {
         if (obj) {
             // The object was changed
-            this.log.info(`object ${id} changed: ${JSON.stringify(obj)}`);
+            // this.log.info(`object ${id} changed: ${JSON.stringify(obj)}`);
         } else {
             // The object was deleted
             this.log.info(`object ${id} deleted`);
@@ -260,29 +277,29 @@ class Bsblan extends utils.Adapter {
     onStateChange(id, state) {
         if (state) {
             // The state was changed
-            this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
+            // this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
         } else {
             // The state was deleted
             this.log.info(`state ${id} deleted`);
         }
     }
 
-    // /**
-    //  * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
-    //  * Using this method requires "common.message" property to be set to true in io-package.json
-    //  * @param {ioBroker.Message} obj
-    //  */
-    // onMessage(obj) {
-    // 	if (typeof obj === "object" && obj.message) {
-    // 		if (obj.command === "send") {
-    // 			// e.g. send email or pushover or whatever
-    // 			this.log.info("send command");
+// /**
+//  * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
+//  * Using this method requires "common.message" property to be set to true in io-package.json
+//  * @param {ioBroker.Message} obj
+//  */
+// onMessage(obj) {
+// 	if (typeof obj === "object" && obj.message) {
+// 		if (obj.command === "send") {
+// 			// e.g. send email or pushover or whatever
+// 			this.log.info("send command");
 
-    // 			// Send response in callback if required
-    // 			if (obj.callback) this.sendTo(obj.from, obj.command, "Message received", obj.callback);
-    // 		}
-    // 	}
-    // }
+// 			// Send response in callback if required
+// 			if (obj.callback) this.sendTo(obj.from, obj.command, "Message received", obj.callback);
+// 		}
+// 	}
+// }
 
 }
 
