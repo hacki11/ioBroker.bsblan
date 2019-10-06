@@ -44,20 +44,28 @@ class Bsblan extends utils.Adapter {
             this.auth = {}
         }
 
+        this.values = this.resolveConfigValues();
+
         // in this template all states changes inside the adapters namespace are subscribed
         this.subscribeStates("*");
 
-        this.valuesAsCSV = this.config.values.replace(/\s/g, '');
-        this.values = [...new Set(this.valuesAsCSV.split(","))].sort();
-
-
-        await //this.detectNewObjects(this.values)
-            //.then(newValues =>
-            this.initializeParameters(this.values);
-            // .catch((error) => this.errorHandler(error));
-
-
         this.update();
+    }
+
+    resolveConfigValues() {
+        let values = new Set();
+        for (let line of this.config.values.split(/\r?\n/)) {
+            for (let entry of line.split(",")) {
+                let value = entry.trim();
+                if (isNaN(parseInt(value))) {
+                    this.log.error(value + " is not a valid id to retrieve.")
+                } else {
+                    values.add(entry.trim());
+                }
+            }
+        }
+        console.log(values)
+        return values;
     }
 
     async detectNewObjects(values) {
@@ -143,7 +151,7 @@ class Bsblan extends utils.Adapter {
     }
 
     update() {
-        rp(this.options("http://" + this.config.host + "/JQ=" + this.valuesAsCSV))
+        rp(this.options("http://" + this.config.host + "/JQ=" + [...this.values].join(",")))
             .then(result => this.setStates(result));
 
         this.timer = setTimeout(() => this.update(), this.interval);
