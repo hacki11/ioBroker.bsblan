@@ -115,7 +115,6 @@ class Bsblan extends utils.Adapter {
 
         var values = await this.bsb.query(values);
 
-        // let params = {};
         for (let category of Object.keys(categoryMap)) {
             this.log.info("Fetching category " + category + " " + categoryMap[category].native.name + " ...")
             await this.bsb.category(category)
