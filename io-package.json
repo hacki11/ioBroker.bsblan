@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "bsblan",
-        "version": "0.0.2",
+        "version": "0.0.3",
         "news": {
             "0.0.1": {
                 "en": "initial release",
@@ -45,7 +45,7 @@
             "hacki11 <jur.schmid@gmail.com>"
         ],
         "keywords": [
-            "broetje gas heizung bsb lan"
+            "broetje brötje mhg fujitsu elco siemens lpb heating gas heizung bsb lan"
         ],
         "license": "MIT",
         "platform": "Javascript/Node.js",
@@ -70,7 +70,7 @@
         "user": "",
         "password": "",
         "values": "700",
-        "interval": "60"
+        "interval": "10"
     },
     "objects": [],
     "instanceObjects": []

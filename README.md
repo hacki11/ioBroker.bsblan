@@ -10,78 +10,40 @@
 
 **Tests:**: [![Travis-CI](http://img.shields.io/travis/hacki11/ioBroker.bsblan/master.svg)](https://travis-ci.org/hacki11/ioBroker.bsblan)
 
-## bsblan adapter for ioBroker
+## bsb_lan adapter for ioBroker
 
-Describe your project here
+This adapter connects the [BSB_LAN Interface](https://github.com/fredlcore/bsb_lan) to ioBroker.
+The BSB_LAN Interface brings the BSB (Boiler System Bus) to LAN. This adapter connects it to ioBroker.
 
-## Developer manual
-This section is intended for the developer. It can be deleted later
+[BSB_LAN Interface User manual](https://github.com/1coderookie/BSB-LPB-LAN)
 
-### Getting started
+## Supported devices
+- BSB/LPB compatible devices (e.g. Brötje, Elco, MHG, Fujitsu)
+- see for details: [Supported Devices](https://github.com/1coderookie/BSB-LPB-LAN)
 
-You are almost done, only a few steps left:
-1. Create a new repository on GitHub with the name `ioBroker.bsblan`
-1. Initialize the current folder as a new git repository:  
-    ```bash
-    git init
-    git add .
-    git commit -m "Initial commit"
-    ```
-1. Link your local repository with the one on GitHub:  
-    ```bash
-    git remote add origin https://github.com/hacki11/ioBroker.bsblan
-    ```
+## Usage
+- BSB_LAN Interface is up and running
+- Install Adapter
+- Configure 
+    - IP
+    - User and password (if basic auth activated)
+    - Poll interval in seconds (10 is minimum)
+    - IDs which should be polled (comma- or newline separated, see Webinterface of BSB_LAN for available ids)
 
-1. Push all files to the GitHub repo:  
-    ```bash
-    git push origin master
-    ```
-1. Head over to [main.js](main.js) and start programming!
-
-### Scripts in `package.json`
-Several npm scripts are predefined for your convenience. You can run them using `npm run <scriptname>`
-| Script name | Description                                              |
-|-------------|----------------------------------------------------------|
-| `test:js`   | Executes the tests you defined in `*.test.js` files.     |
-| `test:package`    | Ensures your `package.json` and `io-package.json` are valid. |
-| `test` | Performs a minimal test run on package files and your tests. |
-| `coverage` | Generates code coverage using your test files. |
-
-### Writing tests
-When done right, testing code is invaluable, because it gives you the 
-confidence to change your code while knowing exactly if and when 
-something breaks. A good read on the topic of test-driven development 
-is https://hackernoon.com/introduction-to-test-driven-development-tdd-61a13bc92d92. 
-Although writing tests before the code might seem strange at first, but it has very 
-clear upsides.
-
-The template provides you with basic tests for the adapter startup and package files.
-It is recommended that you add your own tests into the mix.
-
-### Publishing the adapter
-See the documentation of [ioBroker.repositories](https://github.com/ioBroker/ioBroker.repositories#requirements-for-adapter-to-get-added-to-the-latest-repository).
-
-### Test the adapter manually on a local ioBroker installation
-In order to install the adapter locally without publishing, the following steps are recommended:
-1. Create a tarball from your dev directory:  
-    ```bash
-    npm pack
-    ```
-1. Upload the resulting file to your ioBroker host
-1. Install it locally (The paths are different on Windows):
-    ```bash
-    cd /opt/iobroker
-    npm i /path/to/tarball.tgz
-    ```
-
-For later updates, the above procedure is not necessary. Just do the following:
-1. Overwrite the changed files in the adapter directory (`/opt/iobroker/node_modules/iobroker.bsblan`)
-1. Execute `iobroker upload bsblan` on the ioBroker host
+## Limitations
+- TODO: allow write access for IDs
 
 ## Changelog
+### 0.0.3
+* dynamically create states
+* IDs without whitespaces
+* add textarea for configuration
 
 ### 0.0.1
 * (hacki11) initial release
+
+## Credits
+- Icon made by [Freepik](https://www.freepik.com/home) from www.flaticon.com
 
 ## License
 MIT License
