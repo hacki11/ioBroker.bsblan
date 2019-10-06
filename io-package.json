@@ -18,16 +18,8 @@
         },
         "title": "BSB LAN",
         "titleLang": {
-            "en": "BSB LAN",
-            "de": "BSB LAN",
-            "ru": "BSB LAN",
-            "pt": "BSB LAN",
-            "nl": "BSB LAN",
-            "fr": "BSB LAN",
-            "it": "LAN BSB",
-            "es": "BSB LAN",
-            "pl": "BSB LAN",
-            "zh-cn": "BSB局域网"
+            "en": "Connects the BSB_LAN Interface with ioBroker",
+            "de": "Verbindet das BSB_LAN Interface mit ioBroker"
         },
         "desc": {
             "en": "bsblan",
