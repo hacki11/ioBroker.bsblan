@@ -22,16 +22,8 @@
             "de": "Verbindet das BSB_LAN Interface mit ioBroker"
         },
         "desc": {
-            "en": "bsblan",
-            "de": "bsblan",
-            "ru": "bsblan",
-            "pt": "bsblan",
-            "nl": "bsblan",
-            "fr": "bsblan",
-            "it": "bsblan",
-            "es": "bsblan",
-            "pl": "bsblan",
-            "zh-cn": "bsblan"
+            "en": "Connects the BSB_LAN Interface with ioBroker",
+            "de": "Verbindet das BSB_LAN Interface mit ioBroker"
         },
         "authors": [
             "hacki11 <jur.schmid@gmail.com>"
