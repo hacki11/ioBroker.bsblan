@@ -182,7 +182,7 @@ class Bsblan extends utils.Adapter {
     }
 
     createId(key, name) {
-        return name.replace(/\s/g, "_").replace(/\./g, "") + "_(" + key + ")";
+        return name.replace(/\s/g, "_").replace(/\./g, "").replace(/`/g, "_") + "_(" + key + ")";
     }
 
     createObjectStates(possibleValues) {
