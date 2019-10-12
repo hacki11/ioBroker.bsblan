@@ -70,7 +70,7 @@ class Bsblan extends utils.Adapter {
     }
 
     update() {
-        this.log.info("Fetch values ...")
+        this.log.debug("Fetch values ...")
         this.detectNewObjects(this.values)
             .then(newValues => this.initializeParameters(newValues))
             .then(() => this.connectionHandler(true))
@@ -84,7 +84,7 @@ class Bsblan extends utils.Adapter {
     }
 
     refreshTimer() {
-        this.log.info("Reset Timer")
+        this.log.debug("Reset Timer")
         this.timer = setTimeout(() => this.update(), this.interval);
     }
 
@@ -176,7 +176,7 @@ class Bsblan extends utils.Adapter {
     }
 
     setStates(data) {
-        this.log.info(JSON.stringify(data));
+        this.log.debug(JSON.stringify(data));
         for (let key of Object.keys(data)) {
             this.setStateAsync(this.createId(key, data[key].name), {val: data[key].value, ack: true})
                 .catch((error) => this.errorHandler(error));
