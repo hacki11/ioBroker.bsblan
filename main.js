@@ -27,7 +27,6 @@ class Bsblan extends utils.Adapter {
      * Is called when databases are connected and adapter received configuration.
      */
     async onReady() {
-        // Initialize your adapter here
         // setup timer
         this.interval = this.config.interval || 60;
         this.interval *= 1000;
@@ -37,14 +36,6 @@ class Bsblan extends utils.Adapter {
         this.bsb = new BSB(this.config.host, this.config.user, this.config.password);
 
         this.values = this.resolveConfigValues();
-
-
-        // if (this.newValues.length !== 0) {
-        //     this.log.info("New values found: " + [...this.newValues].sort());
-        //     await this.initializeParameters(this.newValues);
-        // }
-        // // in this template all states changes inside the adapters namespace are subscribed
-        this.subscribeStates("*");
 
         this.update();
     }
@@ -260,6 +251,5 @@ if (module && module.parent) {
     module.exports = (options) => new Bsblan(options);
 } else {
     // otherwise start the instance directly
-    //this.log.info("running in normal mode");
     new Bsblan();
 }
