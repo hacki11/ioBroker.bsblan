@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "bsblan",
-        "version": "0.0.6",
+        "version": "0.1.0",
         "news": {
+            "0.1.0": {
+                "en": "Support writing values to BSB_LAN Interface to control the device",
+                "de": "Unterstützung zum Schreiben von Werten und damit das Steuern des Heizgeräts"
+            },
             "0.0.1": {
                 "en": "initial release",
                 "de": "Erstveröffentlichung",
@@ -47,7 +51,9 @@
             {
                 "js-controller": ">=1.4.2"
             }
-        ]
+        ],
+        "connectionType": "local",
+        "dataSource": "poll"
     },
     "native": {
         "host": "",
