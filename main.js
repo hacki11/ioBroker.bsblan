@@ -20,6 +20,7 @@ class Bsblan extends utils.Adapter {
             name: "bsblan",
         });
         this.on("ready", this.onReady.bind(this));
+        this.on("stateChange", this.onStateChange.bind(this));
         this.on("unload", this.onUnload.bind(this));
     }
 
@@ -37,6 +38,10 @@ class Bsblan extends utils.Adapter {
 
         this.values = this.resolveConfigValues();
 
+       this.migrateExistingObjects();
+
+        this.subscribeStates("*");
+
         this.update();
     }
 
@@ -45,7 +50,9 @@ class Bsblan extends utils.Adapter {
         for (let line of this.config.values.split(/\r?\n/)) {
             for (let entry of line.split(",")) {
                 let value = entry.trim();
-                if (isNaN(parseInt(value))) {
+                if(value.length === 0) {
+                    //ignore
+                } else if (isNaN(parseInt(value))) {
                     this.log.error(value + " is not a valid id to retrieve.")
                 } else {
                     values.add(entry.trim());
@@ -53,7 +60,7 @@ class Bsblan extends utils.Adapter {
             }
         }
         let valuesArray = [...values].sort();
-        this.log.info("Values found: " + valuesArray)
+        this.log.info("Values found: " + valuesArray);
         return valuesArray;
     }
 
@@ -74,6 +81,39 @@ class Bsblan extends utils.Adapter {
     refreshTimer() {
         this.log.debug("Reset Timer")
         this.timer = setTimeout(() => this.update(), this.interval);
+    }
+
+    /**
+     * Is called if a subscribed state changes
+     * @param {string} id
+     * @param {ioBroker.State | null | undefined} state
+     */
+    async onStateChange(id, state) {
+        if (state) {
+            // The state was changed
+            if (this.bsb && state && !state.ack) {
+                this.log.info(`Sending write request for ${id} (value: ${state.val})`);
+
+                this.getObjectAsync(id)
+                    .then(obj => this.bsb.write(obj.native.id, state.val, obj.native.bsb.dataType))
+                    .then(response => {
+                        this.log.debug(`Received write response: ${JSON.stringify(response)}`);
+                        return this.bsb.query(Object.keys(response));
+                    })
+                    .then(result => this.setStates(result))
+                    .catch((error) => {
+                        if(error.name === "BSBWriteError") {
+                            this.log.error(`Error writing value: ${error.message}`);
+                            // ignore
+                        } else {
+                            this.errorHandler(error);
+                        }
+                    })
+            }
+        } else {
+            // The state was deleted
+            this.log.info(`state ${id} deleted`);
+        }
     }
 
     async initializeParameters(values) {
@@ -149,15 +189,18 @@ class Bsblan extends utils.Adapter {
                 type: this.mapType(param.dataType),
                 role: "value",
                 read: true,
-                write: false,
-                unit: this.parseUnit(value.unit),
-                states: this.createObjectStates(param.possibleValues)
+                write: this.bsb.isReadWrite(key, param.dataType),
+                unit: this.parseUnit(value.unit)
             },
             native: {
                 id: key,
                 bsb: param,
             }
         };
+        if(param.possibleValues.length > 0) {
+            obj.common.states = this.createObjectStates(param.possibleValues);
+        }
+
         this.setObjectNotExistsAsync(this.createId(key, param.name), obj)
             .then(this.setStateAsync(this.createId(key, param.name), {val: value.value, ack: true}))
             .catch((error) => this.errorHandler(error));
@@ -193,11 +236,11 @@ class Bsblan extends utils.Adapter {
             case 2:
                 return "string"; // weekday
             case 3:
-                return "number"; // hr/min
+                return "string"; // hr/min
             case 4:
                 return "string"; // date/time
             case 5:
-                return "number"; // day/month
+                return "string"; // day/month
             case 6:
                 return "string"; // string
             default:
@@ -209,6 +252,35 @@ class Bsblan extends utils.Adapter {
         return unit
             .replace("&deg;", "°")
             .replace("&#037;", "%");
+    }
+
+    migrateExistingObjects() {
+        this.getAdapterObjectsAsync().then(objects => {
+            for (let id in objects) {
+                var obj = objects[id];
+                if(obj.native.bsb) {
+                    this.fixReadWrite(obj);
+                    this.fixEmptyStates(obj);
+
+                    this.extendObject(id, obj);
+                }
+            }
+        });
+    }
+
+    fixReadWrite(obj) {
+        var rw = this.bsb.isReadWrite(obj.native.id, obj.native.bsb.dataType);
+        if(rw !== obj.common.write) {
+            this.log.info(`Migrate ${obj._id}: set write = ${rw}`)
+            obj.common.write = rw;
+        }
+    }
+
+    fixEmptyStates(obj) {
+        if(obj.common.states && Object.keys(obj.common.states).length === 0) {
+            this.log.info(`Migrate ${obj._id}: remove empty states`)
+            obj.common.states = null;
+        }
     }
 
     errorHandler(error) {
@@ -226,7 +298,7 @@ class Bsblan extends utils.Adapter {
             else
                 this.log.error("Connection failed");
 
-            this.setState("info.connection", this.connection);
+            this.setState("info.connection", this.connection, true);
         }
     }
 
