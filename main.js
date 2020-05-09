@@ -251,7 +251,8 @@ class Bsblan extends utils.Adapter {
     parseUnit(unit) {
         return unit
             .replace("&deg;", "°")
-            .replace("&#037;", "%");
+            .replace("&#037;", "%")
+            .replace("&#181;", "u");  // micro
     }
 
     migrateExistingObjects() {
