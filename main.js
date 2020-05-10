@@ -118,7 +118,7 @@ class Bsblan extends utils.Adapter {
 
     async initializeParameters(values) {
 
-        if (!values || values.size == 0) return;
+        if (!values || values.size === 0) return;
 
         this.log.info("Setup new objects (" + [...values] + ") ...")
         this.categories = await this.bsb.categories();
@@ -142,15 +142,29 @@ class Bsblan extends utils.Adapter {
             }
         }
 
-        var values = await this.bsb.query(values);
+        var queriedValues = await this.bsb.query(values);
 
+        var createdValues = new Set()
         for (let category of Object.keys(categoryMap)) {
             this.log.info("Fetching category " + category + " " + categoryMap[category].native.name + " ...")
             await this.bsb.category(category)
-                .then(result => this.setupCategory(categoryMap[category], result, values));
+                .then(result => this.setupCategory(categoryMap[category], result, queriedValues))
+                .then(result => createdValues = new Set([...createdValues, ...result]))
         }
 
+        this.showInvalidValues(createdValues, values)
+
         this.log.info("Setup objects done.")
+        return createdValues;
+    }
+
+    showInvalidValues(createdValues, newValues) {
+
+        for(let value of newValues) {
+            if(!createdValues.has(value)) {
+                this.log.warn("Value not found, skipping: " + value)
+            }
+        }
     }
 
     detectNewObjects(values) {
@@ -171,10 +185,14 @@ class Bsblan extends utils.Adapter {
     setupCategory(category, params, values) {
         var name = category.native['name'] + " (" + category.native['min'] + " - " + category.native['max'] + ")";
         this.log.info("Setup category " + category.id + ": " + name);
-
+        var createdValues = new Set();
         for (let value of category.values) {
-            this.setupObject(value, params[value], values[value]);
+            if (params.hasOwnProperty(value)) {
+                this.setupObject(value, params[value], values[value]);
+                createdValues.add(value)
+            }
         }
+        return createdValues;
     }
 
     async setupObject(key, param, value) {
