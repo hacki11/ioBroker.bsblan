@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "bsblan",
-        "version": "0.1.1",
+        "version": "0.1.2",
         "news": {
+            "0.1.2":{
+                "en": "Support INF interface for setting external room temperatures",
+                "de": "Unterstützung der INF Schnittstelle um externe Raumtemperaturen zu übermitteln"
+            },
             "0.1.1":{
                 "en": "Support for micro and bugfixes",
                 "de": "Unterstützung der Einheit micro und Bugfixes"
