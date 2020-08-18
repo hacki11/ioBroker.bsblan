@@ -188,7 +188,8 @@ class Bsblan extends utils.Adapter {
         var createdValues = new Set();
         for (let value of category.values) {
             if (params.hasOwnProperty(value)) {
-                this.setupObject(value, params[value], values[value]);
+                this.setupObject(value, params[value], values[value])
+                    .catch((error) => this.errorHandler(error))
                 createdValues.add(value)
             }
         }
