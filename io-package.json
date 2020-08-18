@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "bsblan",
-        "version": "0.1.2",
+        "version": "0.1.3",
         "news": {
+            "0.1.3": {
+                "en": "Bugfix: Amount of IDs were silently limited",
+                "de": "Bugfix: Menge an IDs wurde begrenzt"
+            },
             "0.1.2":{
                 "en": "Support INF interface for setting external room temperatures",
                 "de": "Unterstützung der INF Schnittstelle um externe Raumtemperaturen zu übermitteln"
