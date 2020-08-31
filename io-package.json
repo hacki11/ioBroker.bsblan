@@ -3,6 +3,10 @@
         "name": "bsblan",
         "version": "0.1.4",
         "news": {
+            "0.1.5": {
+                "en": "Config changed: 8700 readonly, 10003 writeType:1",
+                "de": "Konfiguration geändert: 8700 readonly, 10003 writeType:1"
+            },
             "0.1.4": {
                 "en": "tbd",
                 "de": "tbd"
