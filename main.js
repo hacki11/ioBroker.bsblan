@@ -38,7 +38,7 @@ class Bsblan extends utils.Adapter {
 
         this.values = this.resolveConfigValues();
 
-       this.migrateExistingObjects();
+        await this.migrateExistingObjects();
 
         this.subscribeStates("*");
 
@@ -50,7 +50,7 @@ class Bsblan extends utils.Adapter {
         for (let line of this.config.values.split(/\r?\n/)) {
             for (let entry of line.split(",")) {
                 let value = entry.trim();
-                if(value.length === 0) {
+                if (value.length === 0) {
                     //ignore
                 } else if (isNaN(parseInt(value))) {
                     this.log.error(value + " is not a valid id to retrieve.")
@@ -71,6 +71,8 @@ class Bsblan extends utils.Adapter {
             .then(() => this.connectionHandler(true))
             .then(() => this.bsb.query(this.values))
             .then(result => this.setStates(result))
+            .then(() => this.bsb.query24hAverages())
+            .then(result24h => this.set24hAverages(result24h))
             .then(() => this.refreshTimer())
             .catch((error) => {
                 this.errorHandler(error);
@@ -102,7 +104,7 @@ class Bsblan extends utils.Adapter {
                     })
                     .then(result => this.setStates(result))
                     .catch((error) => {
-                        if(error.name === "BSBWriteError") {
+                        if (error.name === "BSBWriteError") {
                             this.log.error(`Error writing value: ${error.message}`);
                             // ignore
                         } else {
@@ -160,8 +162,8 @@ class Bsblan extends utils.Adapter {
 
     showInvalidValues(createdValues, newValues) {
 
-        for(let value of newValues) {
-            if(!createdValues.has(value)) {
+        for (let value of newValues) {
+            if (!createdValues.has(value)) {
                 this.log.warn("Value not found, skipping: " + value)
             }
         }
@@ -173,9 +175,11 @@ class Bsblan extends utils.Adapter {
         return this.getAdapterObjectsAsync()
             .then(records => {
                 for (let key of Object.keys(records)) {
-                    let id = records[key].native.id;
-                    if (newValues.has(id)) {
-                        newValues.delete(id);
+                    if (records[key].native) {
+                        let id = records[key].native.id;
+                        if (newValues.has(id)) {
+                            newValues.delete(id);
+                        }
                     }
                 }
                 return newValues;
@@ -216,17 +220,60 @@ class Bsblan extends utils.Adapter {
                 bsb: param,
             }
         };
-        if(param.possibleValues.length > 0) {
+        if (param.possibleValues.length > 0) {
             obj.common.states = this.createObjectStates(param.possibleValues);
         }
+
 
         this.setObjectNotExistsAsync(this.createId(key, param.name), obj)
             .then(this.setStateAsync(this.createId(key, param.name), {val: value.value, ack: true}))
             .catch((error) => this.errorHandler(error));
     }
 
+    async set24hAvgObject(key, param) {
+        let name = param.name + " (" + key + ")"
+
+        this.log.info("Set 24h Average: " + name)
+
+        let obj = {
+            type: "state",
+            common: {
+                name: name,
+                type: "number",
+                role: "value",
+                read: true,
+                write: false,
+                unit: this.parseUnit(param.unit)
+            },
+            native: {
+                id: key,
+                bsb: param,
+                avg: "24h"
+            }
+        }
+
+        await this.setObjectNotExistsAsync("24h", {
+            type: "channel",
+            common: {
+                name: "24h averages"
+            }
+        })
+
+        await this.setObjectNotExistsAsync("24h." + this.createId(key, param.name), obj)
+            .then(this.setStateAsync("24h." + this.createId(key, param.name), {val: param.value, ack: true}))
+            .catch((error) => this.errorHandler(error))
+    }
+
+    async set24hAverages(data) {
+        this.log.debug("/JA Response: " + JSON.stringify(data))
+
+        for (let key of Object.keys(data)) {
+            await this.set24hAvgObject(key, data[key])
+        }
+    }
+
     setStates(data) {
-        this.log.debug(JSON.stringify(data));
+        this.log.debug("/JQ Response: " + JSON.stringify(data));
         for (let key of Object.keys(data)) {
             this.setStateAsync(this.createId(key, data[key].name), {val: data[key].value, ack: true})
                 .catch((error) => this.errorHandler(error));
@@ -274,11 +321,11 @@ class Bsblan extends utils.Adapter {
             .replace("&#181;", "u");  // micro
     }
 
-    migrateExistingObjects() {
+    async migrateExistingObjects() {
         this.getAdapterObjectsAsync().then(objects => {
             for (let id in objects) {
                 var obj = objects[id];
-                if(obj.native.bsb) {
+                if (obj.native && obj.native.bsb) {
                     this.fixReadWrite(obj);
                     this.fixEmptyStates(obj);
 
@@ -290,14 +337,14 @@ class Bsblan extends utils.Adapter {
 
     fixReadWrite(obj) {
         var rw = this.bsb.isReadWrite(obj.native.id, obj.native.bsb.dataType);
-        if(rw !== obj.common.write) {
+        if (rw !== obj.common.write) {
             this.log.info(`Migrate ${obj._id}: set write = ${rw}`)
             obj.common.write = rw;
         }
     }
 
     fixEmptyStates(obj) {
-        if(obj.common.states && Object.keys(obj.common.states).length === 0) {
+        if (obj.common.states && Object.keys(obj.common.states).length === 0) {
             this.log.info(`Migrate ${obj._id}: remove empty states`)
             obj.common.states = null;
         }
