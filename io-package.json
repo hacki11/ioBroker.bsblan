@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "bsblan",
-        "version": "0.2.0",
+        "version": "0.2.1",
         "news": {
+            "0.2.1": {
+                "en": "Fix write issue with new bsb_lan2 firmware",
+                "de": "Behebt ein Problem beim Schreiben von Werten mit der neuen bsb_lan2 Firmware"
+            },
             "0.2.0": {
                 "en": "Add 24h averages (needs BSB_LAN FW 1.1)",
                 "de": "Unterstützung für 24h Durchschnittswerte (ab BSB_LAN FW 1.1)"
