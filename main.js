@@ -212,7 +212,7 @@ class Bsblan extends utils.Adapter {
                 type: this.mapType(param.dataType),
                 role: "value",
                 read: true,
-                write: this.bsb.isReadWrite(key, param.dataType),
+                write: !(!!+param.readonly),
                 unit: this.parseUnit(value.unit)
             },
             native: {
