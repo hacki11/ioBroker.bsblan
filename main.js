@@ -281,7 +281,7 @@ class Bsblan extends utils.Adapter {
     }
 
     createId(key, name) {
-        return name.replace(/\s/g, "_").replace(/\./g, "").replace(/`/g, "_") + "_(" + key + ")";
+        return name.replace(/[\]\[*,;'"`<>’\\\s?]/g, "_").replace(/\./g, "") + "_(" + key + ")";
     }
 
     createObjectStates(possibleValues) {
@@ -330,6 +330,8 @@ class Bsblan extends utils.Adapter {
                     this.fixEmptyStates(obj);
 
                     this.extendObject(id, obj);
+
+                    this.warnInvalidCharacters(obj)
                 }
             }
         });
@@ -347,6 +349,14 @@ class Bsblan extends utils.Adapter {
         if (obj.common.states && Object.keys(obj.common.states).length === 0) {
             this.log.info(`Migrate ${obj._id}: remove empty states`)
             obj.common.states = null;
+        }
+    }
+
+    warnInvalidCharacters(obj) {
+        var newId = this.createId(obj.native.id, obj.native.bsb.name)
+        var oldId = obj._id.split('.');
+        if(oldId[oldId.length - 1] !== newId) {
+            this.log.warn(`Object ${obj._id} contains illegal characters, please delete. ${newId} will then be created automatically.`)
         }
     }
 
