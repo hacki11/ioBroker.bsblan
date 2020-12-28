@@ -3,6 +3,10 @@
         "name": "bsblan",
         "version": "0.2.1",
         "news": {
+            "0.2.2": {
+              "en": "Replace invalid characters for Object-IDs stated by JS-Controller",
+              "de": "Ersetzt für JS-Controller üngültige Zeichen für Objekt-IDs"
+            },
             "0.2.1": {
                 "en": "Fix write issue with new bsb_lan2 firmware",
                 "de": "Behebt ein Problem beim Schreiben von Werten mit der neuen bsb_lan2 Firmware"
