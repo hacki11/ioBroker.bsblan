@@ -8,6 +8,7 @@
 // you need to create an adapter
 const utils = require("@iobroker/adapter-core");
 const BSB = require("./lib/bsb");
+const {InfoObjects} = require("./lib/config");
 
 class Bsblan extends utils.Adapter {
 
@@ -42,7 +43,8 @@ class Bsblan extends utils.Adapter {
 
         this.subscribeStates("*");
 
-        this.update();
+        await this.setupDefaultObjects();
+        await this.update();
     }
 
     resolveConfigValues() {
@@ -64,9 +66,15 @@ class Bsblan extends utils.Adapter {
         return valuesArray;
     }
 
-    update() {
+    async update() {
+        await this.updateDefaultStates()
+            .catch((error) => {
+                this.errorHandler(error);
+                this.refreshTimer();
+            });
+
         this.log.debug("Fetch values ...");
-        this.detectNewObjects(this.values)
+        await this.detectNewObjects(this.values)
             .then(newValues => this.initializeParameters(newValues))
             .then(() => this.connectionHandler(true))
             .then(() => this.bsb.query(this.values))
@@ -200,6 +208,43 @@ class Bsblan extends utils.Adapter {
         return createdValues;
     }
 
+    async setupDefaultObjects() {
+        this.log.info("Fetch device information ...");
+        const info = await this.bsb.queryInfo()
+            .catch(error => this.errorHandler(error));
+
+        for (const object of InfoObjects) {
+            const name = "info." + object.id;
+            if (Object.hasOwnProperty.call(info, object.id)) {
+                await this.setObjectNotExistsAsync(name, object.obj)
+                    .then(response => {
+                        // if the object exists, we get an undefined
+                        if(response !== undefined) {
+                            this.log.info("Add Info Object: " + name + response);
+                        }
+                    })
+                    .catch(error => this.errorHandler(error));
+            }
+        }
+    }
+
+    async updateDefaultStates() {
+        this.log.info("Fetch device information ...");
+        await this.bsb.queryInfo()
+            .then(info => this.setDefaultStates(info))
+            .catch(error => this.errorHandler(error));
+    }
+
+    async setDefaultStates(info) {
+        for (const object of InfoObjects) {
+            const name = "info." + object.id;
+            if (Object.hasOwnProperty.call(info, object.id)) {
+                await this.setStateAsync(name, {val: info[object.id], ack: true})
+                    .catch(error => this.errorHandler(error));
+            }
+        }
+    }
+
     async setupObject(key, param, value) {
         const name = param.name + " (" + key + ")";
 
@@ -207,9 +252,9 @@ class Bsblan extends utils.Adapter {
 
         // bsb_lan 2.x feature
         let write;
-        if(Object.prototype.hasOwnProperty.call(value, "readonly")) {
+        if (Object.prototype.hasOwnProperty.call(value, "readonly")) {
             write = value.readonly === 0;
-        } else  {
+        } else {
             write = this.bsb.isReadWrite(key, param.dataType);
         }
 
@@ -363,7 +408,7 @@ class Bsblan extends utils.Adapter {
     warnInvalidCharacters(obj) {
         const newId = this.createId(obj.native.id, obj.native.bsb.name);
         const oldId = obj._id.split(".");
-        if(oldId[oldId.length - 1] !== newId) {
+        if (oldId[oldId.length - 1] !== newId) {
             this.log.warn(`Object ${obj._id} contains illegal characters, please delete. ${newId} will then be created automatically.`);
         }
     }
