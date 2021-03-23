@@ -205,6 +205,14 @@ class Bsblan extends utils.Adapter {
 
         this.log.info("Add Parameter: " + name);
 
+        // bsb_lan 2.x feature
+        let write;
+        if(Object.prototype.hasOwnProperty.call(value, "readonly")) {
+            write = value.readonly === 0;
+        } else  {
+            write = this.bsb.isReadWrite(key, param.dataType);
+        }
+
         const obj = {
             type: "state",
             common: {
@@ -212,7 +220,7 @@ class Bsblan extends utils.Adapter {
                 type: this.mapType(param.dataType),
                 role: "value",
                 read: true,
-                write: this.bsb.isReadWrite(key, param.dataType),
+                write: write,
                 unit: this.parseUnit(value.unit)
             },
             native: {
