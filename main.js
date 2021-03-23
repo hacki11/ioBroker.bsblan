@@ -46,26 +46,26 @@ class Bsblan extends utils.Adapter {
     }
 
     resolveConfigValues() {
-        let values = new Set();
-        for (let line of this.config.values.split(/\r?\n/)) {
-            for (let entry of line.split(",")) {
-                let value = entry.trim();
+        const values = new Set();
+        for (const line of this.config.values.split(/\r?\n/)) {
+            for (const entry of line.split(",")) {
+                const value = entry.trim();
                 if (value.length === 0) {
                     //ignore
                 } else if (isNaN(parseInt(value))) {
-                    this.log.error(value + " is not a valid id to retrieve.")
+                    this.log.error(value + " is not a valid id to retrieve.");
                 } else {
                     values.add(entry.trim());
                 }
             }
         }
-        let valuesArray = [...values].sort();
+        const valuesArray = [...values].sort();
         this.log.info("Values found: " + valuesArray);
         return valuesArray;
     }
 
     update() {
-        this.log.debug("Fetch values ...")
+        this.log.debug("Fetch values ...");
         this.detectNewObjects(this.values)
             .then(newValues => this.initializeParameters(newValues))
             .then(() => this.connectionHandler(true))
@@ -81,7 +81,7 @@ class Bsblan extends utils.Adapter {
     }
 
     refreshTimer() {
-        this.log.debug("Reset Timer")
+        this.log.debug("Reset Timer");
         this.timer = setTimeout(() => this.update(), this.interval);
     }
 
@@ -110,7 +110,7 @@ class Bsblan extends utils.Adapter {
                         } else {
                             this.errorHandler(error);
                         }
-                    })
+                    });
             }
         } else {
             // The state was deleted
@@ -122,15 +122,15 @@ class Bsblan extends utils.Adapter {
 
         if (!values || values.size === 0) return;
 
-        this.log.info("Setup new objects (" + [...values] + ") ...")
+        this.log.info("Setup new objects (" + [...values] + ") ...");
         this.categories = await this.bsb.categories();
 
-        let categoryMap = {};
+        const categoryMap = {};
 
-        for (let value of values) {
-            for (let category of Object.keys(this.categories)) {
-                if (value >= this.categories[category]['min'] && value <= this.categories[category]['max']) {
-                    var obj = {
+        for (const value of values) {
+            for (const category of Object.keys(this.categories)) {
+                if (value >= this.categories[category]["min"] && value <= this.categories[category]["max"]) {
+                    const obj = {
                         id: category,
                         native: this.categories[category],
                         values: []
@@ -144,39 +144,39 @@ class Bsblan extends utils.Adapter {
             }
         }
 
-        var queriedValues = await this.bsb.query(values);
+        const queriedValues = await this.bsb.query(values);
 
-        var createdValues = new Set()
-        for (let category of Object.keys(categoryMap)) {
-            this.log.info("Fetching category " + category + " " + categoryMap[category].native.name + " ...")
+        let createdValues = new Set();
+        for (const category of Object.keys(categoryMap)) {
+            this.log.info("Fetching category " + category + " " + categoryMap[category].native.name + " ...");
             await this.bsb.category(category)
                 .then(result => this.setupCategory(categoryMap[category], result, queriedValues))
-                .then(result => createdValues = new Set([...createdValues, ...result]))
+                .then(result => createdValues = new Set([...createdValues, ...result]));
         }
 
-        this.showInvalidValues(createdValues, values)
+        this.showInvalidValues(createdValues, values);
 
-        this.log.info("Setup objects done.")
+        this.log.info("Setup objects done.");
         return createdValues;
     }
 
     showInvalidValues(createdValues, newValues) {
 
-        for (let value of newValues) {
+        for (const value of newValues) {
             if (!createdValues.has(value)) {
-                this.log.warn("Value not found, skipping: " + value)
+                this.log.warn("Value not found, skipping: " + value);
             }
         }
     }
 
     detectNewObjects(values) {
 
-        let newValues = new Set(values);
+        const newValues = new Set(values);
         return this.getAdapterObjectsAsync()
             .then(records => {
-                for (let key of Object.keys(records)) {
+                for (const key of Object.keys(records)) {
                     if (records[key].native) {
-                        let id = records[key].native.id;
+                        const id = records[key].native.id;
                         if (newValues.has(id)) {
                             newValues.delete(id);
                         }
@@ -187,25 +187,25 @@ class Bsblan extends utils.Adapter {
     }
 
     setupCategory(category, params, values) {
-        var name = category.native['name'] + " (" + category.native['min'] + " - " + category.native['max'] + ")";
+        const name = category.native["name"] + " (" + category.native["min"] + " - " + category.native["max"] + ")";
         this.log.info("Setup category " + category.id + ": " + name);
-        var createdValues = new Set();
-        for (let value of category.values) {
+        const createdValues = new Set();
+        for (const value of category.values) {
             if (params.hasOwnProperty(value)) {
                 this.setupObject(value, params[value], values[value])
-                    .catch((error) => this.errorHandler(error))
-                createdValues.add(value)
+                    .catch((error) => this.errorHandler(error));
+                createdValues.add(value);
             }
         }
         return createdValues;
     }
 
     async setupObject(key, param, value) {
-        let name = param.name + " (" + key + ")";
+        const name = param.name + " (" + key + ")";
 
         this.log.info("Add Parameter: " + name);
 
-        let obj = {
+        const obj = {
             type: "state",
             common: {
                 name: name,
@@ -225,17 +225,17 @@ class Bsblan extends utils.Adapter {
         }
 
 
-        this.setObjectNotExistsAsync(this.createId(key, param.name), obj)
+        await this.setObjectNotExistsAsync(this.createId(key, param.name), obj)
             .then(this.setStateAsync(this.createId(key, param.name), {val: value.value, ack: true}))
             .catch((error) => this.errorHandler(error));
     }
 
     async set24hAvgObject(key, param) {
-        let name = param.name + " (" + key + ")"
+        const name = param.name + " (" + key + ")";
 
-        this.log.info("Set 24h Average: " + name)
+        this.log.info("Set 24h Average: " + name);
 
-        let obj = {
+        const obj = {
             type: "state",
             common: {
                 name: name,
@@ -250,31 +250,31 @@ class Bsblan extends utils.Adapter {
                 bsb: param,
                 avg: "24h"
             }
-        }
+        };
 
         await this.setObjectNotExistsAsync("24h", {
             type: "channel",
             common: {
                 name: "24h averages"
             }
-        })
+        });
 
         await this.setObjectNotExistsAsync("24h." + this.createId(key, param.name), obj)
             .then(this.setStateAsync("24h." + this.createId(key, param.name), {val: param.value, ack: true}))
-            .catch((error) => this.errorHandler(error))
+            .catch((error) => this.errorHandler(error));
     }
 
     async set24hAverages(data) {
-        this.log.debug("/JA Response: " + JSON.stringify(data))
+        this.log.debug("/JA Response: " + JSON.stringify(data));
 
-        for (let key of Object.keys(data)) {
-            await this.set24hAvgObject(key, data[key])
+        for (const key of Object.keys(data)) {
+            await this.set24hAvgObject(key, data[key]);
         }
     }
 
     setStates(data) {
         this.log.debug("/JQ Response: " + JSON.stringify(data));
-        for (let key of Object.keys(data)) {
+        for (const key of Object.keys(data)) {
             this.setStateAsync(this.createId(key, data[key].name), {val: data[key].value, ack: true})
                 .catch((error) => this.errorHandler(error));
         }
@@ -285,9 +285,9 @@ class Bsblan extends utils.Adapter {
     }
 
     createObjectStates(possibleValues) {
-        let states = {};
-        for (let entry of possibleValues) {
-            states[entry['enumValue']] = entry['desc']
+        const states = {};
+        for (const entry of possibleValues) {
+            states[entry["enumValue"]] = entry["desc"];
         }
         return states;
     }
@@ -323,40 +323,40 @@ class Bsblan extends utils.Adapter {
 
     async migrateExistingObjects() {
         this.getAdapterObjectsAsync().then(objects => {
-            for (let id in objects) {
-                var obj = objects[id];
+            for (const id in objects) {
+                const obj = objects[id];
                 if (obj.native && obj.native.bsb) {
                     this.fixReadWrite(obj);
                     this.fixEmptyStates(obj);
 
                     this.extendObject(id, obj);
 
-                    this.warnInvalidCharacters(obj)
+                    this.warnInvalidCharacters(obj);
                 }
             }
         });
     }
 
     fixReadWrite(obj) {
-        var rw = this.bsb.isReadWrite(obj.native.id, obj.native.bsb.dataType);
+        const rw = this.bsb.isReadWrite(obj.native.id, obj.native.bsb.dataType);
         if (rw !== obj.common.write) {
-            this.log.info(`Migrate ${obj._id}: set write = ${rw}`)
+            this.log.info(`Migrate ${obj._id}: set write = ${rw}`);
             obj.common.write = rw;
         }
     }
 
     fixEmptyStates(obj) {
         if (obj.common.states && Object.keys(obj.common.states).length === 0) {
-            this.log.info(`Migrate ${obj._id}: remove empty states`)
+            this.log.info(`Migrate ${obj._id}: remove empty states`);
             obj.common.states = null;
         }
     }
 
     warnInvalidCharacters(obj) {
-        var newId = this.createId(obj.native.id, obj.native.bsb.name)
-        var oldId = obj._id.split('.');
+        const newId = this.createId(obj.native.id, obj.native.bsb.name);
+        const oldId = obj._id.split(".");
         if(oldId[oldId.length - 1] !== newId) {
-            this.log.warn(`Object ${obj._id} contains illegal characters, please delete. ${newId} will then be created automatically.`)
+            this.log.warn(`Object ${obj._id} contains illegal characters, please delete. ${newId} will then be created automatically.`);
         }
     }
 
