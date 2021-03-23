@@ -52,6 +52,7 @@
                 "zh-cn": "首次出版"
             }
         },
+        "title": "BSB LAN",
         "titleLang": {
             "en": "Control BSB/PPS/LPB based heating devices using the BSB_LAN interface",
             "de": "Steuerung BSB/PPS/LPB basierter Brennwerthermen und Wärmepumpen"
