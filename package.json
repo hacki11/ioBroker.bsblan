@@ -20,7 +20,8 @@
     "p-queue": "^6.6.1",
     "promise-request-retry": "^1.0.2",
     "request": "^2.88.2",
-    "request-promise": "^4.2.5"
+    "request-promise": "^4.2.5",
+    "safer-buffer": "^2.1.2"
   },
   "devDependencies": {
     "@iobroker/testing": "^1.2.5",
