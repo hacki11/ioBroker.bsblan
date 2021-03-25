@@ -41,6 +41,9 @@ class Bsblan extends utils.Adapter {
 
         await this.migrateExistingObjects();
 
+        // only supported bsb_lan > 2.x
+        await this.updateNativeData();
+
         this.subscribeStates("*");
 
         await this.setupDefaultObjects();
@@ -77,7 +80,7 @@ class Bsblan extends utils.Adapter {
         await this.detectNewObjects(this.values)
             .then(newValues => this.initializeParameters(newValues))
             .then(() => this.connectionHandler(true))
-            .then(() => this.bsb.query(this.values))
+            .then(() => this.bsb.getParameter(this.values))
             .then(result => this.setStates(result))
             .then(() => this.bsb.query24hAverages())
             .then(result24h => this.set24hAverages(result24h))
@@ -108,7 +111,7 @@ class Bsblan extends utils.Adapter {
                     .then(obj => this.bsb.write(obj.native.id, state.val, obj.native.bsb.dataType))
                     .then(response => {
                         this.log.debug(`Received write response: ${JSON.stringify(response)}`);
-                        return this.bsb.query(Object.keys(response));
+                        return this.bsb.getParameter(Object.keys(response));
                     })
                     .then(result => this.setStates(result))
                     .catch((error) => {
@@ -152,7 +155,7 @@ class Bsblan extends utils.Adapter {
             }
         }
 
-        const queriedValues = await this.bsb.query(values);
+        const queriedValues = await this.bsb.getParameter(values);
 
         let createdValues = new Set();
         for (const category of Object.keys(categoryMap)) {
@@ -375,7 +378,7 @@ class Bsblan extends utils.Adapter {
     }
 
     async migrateExistingObjects() {
-        this.getAdapterObjectsAsync().then(objects => {
+        await this.getAdapterObjectsAsync().then(objects => {
             for (const id in objects) {
                 const obj = objects[id];
                 if (obj.native && obj.native.bsb) {
@@ -410,6 +413,33 @@ class Bsblan extends utils.Adapter {
         const oldId = obj._id.split(".");
         if (oldId[oldId.length - 1] !== newId) {
             this.log.warn(`Object ${obj._id} contains illegal characters, please delete. ${newId} will then be created automatically.`);
+        }
+    }
+
+    async updateNativeData() {
+        this.log.info("Updating Metainformation of Parameters...");
+        // get all existing objects
+        const objects = await this.getAdapterObjectsAsync();
+
+        // convert into array of dict [iob id, bsb id]
+        const ids = {};
+        Object.values(objects)
+            .filter(obj => obj.native)
+            .filter(obj => obj.native.id)
+            .filter(obj => !isNaN(obj.native.id))
+            .map(obj => ids[parseInt(obj.native.id)] = obj);
+
+        // fetch parameter definitions (bsb_lan > 2.x)
+        const defs = await this.bsb.getParameterDefinitionAsync(Object.keys(ids));
+
+        // merge native data
+        for(const [bsb_id, obj] of Object.entries(ids)) {
+            // check if the object has a definition available
+            if(Object.hasOwnProperty.call(defs, bsb_id)){
+                // update native data
+                obj.native.bsb = defs[bsb_id];
+                await this.setObjectAsync(obj._id, obj);
+            }
         }
     }
 
