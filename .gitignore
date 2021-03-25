@@ -13,3 +13,4 @@ admin/i18n/flat.txt
 admin/i18n/*/flat.txt
 *.iml
 iob_npm.done
+.dev-server
