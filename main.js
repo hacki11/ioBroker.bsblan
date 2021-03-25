@@ -370,6 +370,7 @@ class Bsblan extends utils.Adapter {
         }
     }
 
+    // TODO make use of new information (dataType_name)
     parseUnit(unit) {
         return unit
             .replace("&deg;", "°")
