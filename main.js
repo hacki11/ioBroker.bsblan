@@ -255,10 +255,11 @@ class Bsblan extends utils.Adapter {
 
         // bsb_lan 2.x feature
         let write;
-        if (Object.prototype.hasOwnProperty.call(value, "readonly")) {
+        if ("readonly" in value) {
             write = value.readonly === 0;
         } else {
-            write = this.bsb.isReadWrite(key, param.dataType);
+            // bsb_lan 1.x we have to guess or hard-code
+            write = this.bsb.isReadWrite(key);
         }
 
         const obj = {
@@ -282,14 +283,14 @@ class Bsblan extends utils.Adapter {
 
 
         await this.setObjectNotExistsAsync(this.createId(key, param.name), obj)
-            .then(this.setStateAsync(this.createId(key, param.name), {val: value.value, ack: true}))
+            .then(() => this.setStateAsync(this.createId(key, param.name), {val: value.value, ack: true}))
             .catch((error) => this.errorHandler(error));
     }
 
     async set24hAvgObject(key, param) {
         const name = param.name + " (" + key + ")";
 
-        this.log.info("Set 24h Average: " + name);
+        this.log.debug("Set 24h Average: " + name);
 
         const obj = {
             type: "state",
@@ -316,7 +317,7 @@ class Bsblan extends utils.Adapter {
         });
 
         await this.setObjectNotExistsAsync("24h." + this.createId(key, param.name), obj)
-            .then(this.setStateAsync("24h." + this.createId(key, param.name), {val: param.value, ack: true}))
+            .then(() => this.setStateAsync("24h." + this.createId(key, param.name), {val: param.value, ack: true}))
             .catch((error) => this.errorHandler(error));
     }
 
@@ -385,9 +386,7 @@ class Bsblan extends utils.Adapter {
                 if (obj.native && obj.native.bsb) {
                     this.fixReadWrite(obj);
                     this.fixEmptyStates(obj);
-
                     this.extendObject(id, obj);
-
                     this.warnInvalidCharacters(obj);
                 }
             }
@@ -431,7 +430,8 @@ class Bsblan extends utils.Adapter {
             .map(obj => ids[parseInt(obj.native.id)] = obj);
 
         // fetch parameter definitions (bsb_lan > 2.x)
-        const defs = await this.bsb.getParameterDefinitionAsync(Object.keys(ids));
+        const defs = await this.bsb.getParameterDefinitionAsync(Object.keys(ids))
+            .catch(error => this.errorHandler(error));
 
         // merge native data
         for(const [bsb_id, obj] of Object.entries(ids)) {
