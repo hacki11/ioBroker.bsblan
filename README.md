@@ -40,6 +40,15 @@ The BSB_LAN Interface brings the BSB (Boiler System Bus) to LAN. This adapter co
 - Numbers, Enums and hr:min types are now writable (of course only writable IDs can be written)
 
 ## Changelog
+
+### 0.3.0
+#### BREAKING CHANGES:
+Due to some conceptual changes in BSB_LAN API v2.0
+* Names of 24h Average values changed (e.g. Außentemperatur_(8700) => 24h Durchschnittswert. Außentemperatur_(20050))
+
+* Add support for BSB_LAN 2.x
+
+
 ### 0.2.2
 * Replace invalid characters: https://github.com/ioBroker/ioBroker.js-controller/issues/198
 
