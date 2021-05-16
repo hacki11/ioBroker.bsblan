@@ -70,6 +70,7 @@ class Bsblan extends utils.Adapter {
     }
 
     async update() {
+        this.log.debug("Fetch device information ...");
         await this.updateDefaultStates()
             .catch((error) => {
                 this.errorHandler(error);
@@ -232,7 +233,6 @@ class Bsblan extends utils.Adapter {
     }
 
     async updateDefaultStates() {
-        this.log.info("Fetch device information ...");
         await this.bsb.queryInfo()
             .then(info => this.setDefaultStates(info))
             .catch(error => this.errorHandler(error));
@@ -242,6 +242,7 @@ class Bsblan extends utils.Adapter {
         for (const object of InfoObjects) {
             const name = "info." + object.id;
             if (Object.hasOwnProperty.call(info, object.id)) {
+                // no conversion needed because BSBLAN already delivers string or number
                 await this.setStateAsync(name, {val: info[object.id], ack: true})
                     .catch(error => this.errorHandler(error));
             }
@@ -317,7 +318,7 @@ class Bsblan extends utils.Adapter {
         });
 
         await this.setObjectNotExistsAsync("24h." + this.createId(key, param.name), obj)
-            .then(() => this.setStateAsync("24h." + this.createId(key, param.name), {val: param.value, ack: true}))
+            .then(() => this.setStateAsync("24h." + this.createId(key, param.name), {val: this.convert(param.value, param.dataType), ack: true}))
             .catch((error) => this.errorHandler(error));
     }
 
@@ -332,7 +333,7 @@ class Bsblan extends utils.Adapter {
     setStates(data) {
         this.log.debug("/JQ Response: " + JSON.stringify(data));
         for (const key of Object.keys(data)) {
-            this.setStateAsync(this.createId(key, data[key].name), {val: data[key].value, ack: true})
+            this.setStateAsync(this.createId(key, data[key].name), {val: this.convert(data[key].value, data[key].dataType), ack: true})
                 .catch((error) => this.errorHandler(error));
         }
     }
@@ -347,6 +348,15 @@ class Bsblan extends utils.Adapter {
             states[entry["enumValue"]] = entry["desc"];
         }
         return states;
+    }
+
+    convert(value, type) {
+        switch (type) {
+            case 0: // VALS
+                return parseFloat(value);
+            default:
+                return value;
+        }
     }
 
     mapType(type) {
