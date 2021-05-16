@@ -404,7 +404,12 @@ class Bsblan extends utils.Adapter {
     }
 
     fixReadWrite(obj) {
-        const rw = this.bsb.isReadWrite(obj.native.id, obj.native.bsb.dataType);
+        // not needed for objects created from V1 firmware
+        if("bsb" in obj.native && "readonly" in obj.native.bsb) {
+            return;
+        }
+
+        const rw = this.bsb.isReadWrite(obj.native.id);
         if (rw !== obj.common.write) {
             this.log.info(`Migrate ${obj._id}: set write = ${rw}`);
             obj.common.write = rw;
