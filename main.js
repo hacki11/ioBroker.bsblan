@@ -214,21 +214,22 @@ class Bsblan extends utils.Adapter {
 
     async setupDefaultObjects() {
         this.log.info("Fetch device information ...");
-        const info = await this.bsb.queryInfo()
+        await this.bsb.queryInfo()
+            .then(info => InfoObjects.map(object => this.setupDefaultObject(object, info)))
             .catch(error => this.errorHandler(error));
+    }
 
-        for (const object of InfoObjects) {
-            const name = "info." + object.id;
-            if (Object.hasOwnProperty.call(info, object.id)) {
-                await this.setObjectNotExistsAsync(name, object.obj)
-                    .then(response => {
-                        // if the object exists, we get an undefined
-                        if(response !== undefined) {
-                            this.log.info("Add Info Object: " + name + response);
-                        }
-                    })
-                    .catch(error => this.errorHandler(error));
-            }
+    async setupDefaultObject(object, info) {
+        const name = "info." + object.id;
+        if (Object.hasOwnProperty.call(info, object.id)) {
+            await this.setObjectNotExistsAsync(name, object.obj)
+                .then(response => {
+                    // if the object exists, we get an undefined
+                    if (response !== undefined) {
+                        this.log.info("Add Info Object: " + name + " " + JSON.stringify(response));
+                    }
+                })
+                .catch(error => this.errorHandler(error));
         }
     }
 
@@ -318,7 +319,10 @@ class Bsblan extends utils.Adapter {
         });
 
         await this.setObjectNotExistsAsync("24h." + this.createId(key, param.name), obj)
-            .then(() => this.setStateAsync("24h." + this.createId(key, param.name), {val: this.convert(param.value, param.dataType), ack: true}))
+            .then(() => this.setStateAsync("24h." + this.createId(key, param.name), {
+                val: this.convert(param.value, param.dataType),
+                ack: true
+            }))
             .catch((error) => this.errorHandler(error));
     }
 
@@ -333,7 +337,10 @@ class Bsblan extends utils.Adapter {
     setStates(data) {
         this.log.debug("/JQ Response: " + JSON.stringify(data));
         for (const key of Object.keys(data)) {
-            this.setStateAsync(this.createId(key, data[key].name), {val: this.convert(data[key].value, data[key].dataType), ack: true})
+            this.setStateAsync(this.createId(key, data[key].name), {
+                val: this.convert(data[key].value, data[key].dataType),
+                ack: true
+            })
                 .catch((error) => this.errorHandler(error));
         }
     }
@@ -405,7 +412,7 @@ class Bsblan extends utils.Adapter {
 
     fixReadWrite(obj) {
         // not needed for objects created from V1 firmware
-        if("bsb" in obj.native && "readonly" in obj.native.bsb) {
+        if ("bsb" in obj.native && "readonly" in obj.native.bsb) {
             return;
         }
 
@@ -449,9 +456,9 @@ class Bsblan extends utils.Adapter {
             .catch(error => this.errorHandler(error));
 
         // merge native data
-        for(const [bsb_id, obj] of Object.entries(ids)) {
+        for (const [bsb_id, obj] of Object.entries(ids)) {
             // check if the object has a definition available
-            if(Object.hasOwnProperty.call(defs, bsb_id)){
+            if (Object.hasOwnProperty.call(defs, bsb_id)) {
                 // update native data
                 obj.native.bsb = defs[bsb_id];
                 await this.setObjectAsync(obj._id, obj);
