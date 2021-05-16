@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "bsblan",
-        "version": "0.2.2",
+        "version": "0.3.0",
         "news": {
+            "0.3.0": {
+                "en": "Add support for BSBLAN Firmware v2",
+                "de": "BSBLAN Firwmare v2 Unterstützung"
+            },
             "0.2.2": {
               "en": "Replace invalid characters for Object-IDs stated by JS-Controller",
               "de": "Ersetzt für JS-Controller üngültige Zeichen für Objekt-IDs"
