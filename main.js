@@ -455,13 +455,15 @@ class Bsblan extends utils.Adapter {
         const defs = await this.bsb.getParameterDefinitionAsync(Object.keys(ids))
             .catch(error => this.errorHandler(error));
 
-        // merge native data
-        for (const [bsb_id, obj] of Object.entries(ids)) {
-            // check if the object has a definition available
-            if (Object.hasOwnProperty.call(defs, bsb_id)) {
-                // update native data
-                obj.native.bsb = defs[bsb_id];
-                await this.setObjectAsync(obj._id, obj);
+        if(defs) {
+            // merge native data
+            for (const [bsb_id, obj] of Object.entries(ids)) {
+                // check if the object has a definition available
+                if (bsb_id in defs) {
+                    // update native data
+                    obj.native.bsb = defs[bsb_id];
+                    await this.setObjectAsync(obj._id, obj);
+                }
             }
         }
     }
