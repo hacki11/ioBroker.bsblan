@@ -16,7 +16,7 @@
     "url": "https://github.com/hacki11/ioBroker.bsblan"
   },
   "dependencies": {
-    "@iobroker/adapter-core": "^2.2.1",
+    "@iobroker/adapter-core": "^2.6.0",
     "p-queue": "^6.6.1",
     "promise-request-retry": "^1.0.2",
     "request": "^2.88.2",
