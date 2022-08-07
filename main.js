@@ -70,14 +70,14 @@ class Bsblan extends utils.Adapter {
     }
 
     async update() {
-        this.log.debug("Fetch device information ...");
+        this.log.debug("Update default states ...");
         await this.updateDefaultStates()
             .catch((error) => {
                 this.errorHandler(error);
                 this.refreshTimer();
             });
 
-        this.log.debug("Fetch values ...");
+        this.log.debug("Update parameters ...");
         await this.detectNewObjects(this.values)
             .then(newValues => this.initializeParameters(newValues))
             .then(() => this.connectionHandler(true))
@@ -320,7 +320,7 @@ class Bsblan extends utils.Adapter {
 
         await this.setObjectNotExistsAsync("24h." + this.createId(key, param.name), obj)
             .then(() => this.setStateAsync("24h." + this.createId(key, param.name), {
-                val: this.convert(param.value, param.dataType),
+                val: this.parseValue(param.value, param.dataType),
                 ack: true
             }))
             .catch((error) => this.errorHandler(error));
@@ -336,12 +336,14 @@ class Bsblan extends utils.Adapter {
 
     setStates(data) {
         this.log.debug("/JQ Response: " + JSON.stringify(data));
-        for (const key of Object.keys(data)) {
-            this.setStateAsync(this.createId(key, data[key].name), {
-                val: this.convert(data[key].value, data[key].dataType),
-                ack: true
-            })
-                .catch((error) => this.errorHandler(error));
+        for (let key of Object.keys(data)) {
+            this.setStateAsync(
+                this.createId(key, data[key].name),
+                {
+                    val: this.parseValue(data[key].value, data[key].dataType),
+                    ack: true
+                }
+            ).catch((error) => this.errorHandler(error));
         }
     }
 
@@ -357,38 +359,45 @@ class Bsblan extends utils.Adapter {
         return states;
     }
 
-    convert(value, type) {
-        switch (type) {
-            case 0: // VALS
-                return parseFloat(value);
-            default:
-                return value;
-        }
-    }
-
     mapType(type) {
         // https://1coderookie.github.io/BSB-LPB-LAN/kap08.html#824-abrufen-und-steuern-mittels-json
         switch (type) {
             case 0:
                 return "number"; // number
             case 1:
-                return "string"; // enum
+                return "number"; // enum
             case 2:
-                return "string"; // weekday
+                return "string" // Bit value
             case 3:
-                return "string"; // hr/min
+                return "string"; // weekday
             case 4:
-                return "string"; // date/time
+                return "string"; // hr/min
             case 5:
-                return "string"; // day/month
+                return "string"; // date/time
             case 6:
+                return "string"; // day/month
+            case 7:
                 return "string"; // string
             default:
                 return "string";
         }
     }
 
-    // TODO make use of new information (dataType_name)
+    parseValue(value, type) {
+        switch(type) {
+            case 0: // number
+            case 1: // enum
+                // BSB_LAN returns --- for numbers
+                // https://github.com/fredlcore/BSB-LAN/issues/469
+                if (value == '---') {
+                    return 0;
+                }
+                return parseFloat(value);
+            default: // no conversion
+                return value;
+        }
+    }
+
     parseUnit(unit) {
         return unit
             .replace("&deg;", "°")
@@ -405,6 +414,7 @@ class Bsblan extends utils.Adapter {
                     this.fixEmptyStates(obj);
                     this.extendObject(id, obj);
                     this.warnInvalidCharacters(obj);
+                    this.fixDataType(obj);
                 }
             }
         });
@@ -438,8 +448,18 @@ class Bsblan extends utils.Adapter {
         }
     }
 
+    fixDataType(obj) {
+        if ("bsb" in obj.native && "dataType" in obj.native.bsb) {
+            const newType = this.mapType(obj.native.bsb.dataType)
+            if (obj.common.type != newType) {
+                this.log.info(`Migrate ${obj._id}: Change data type from ${obj.common.type} to ${newType}`)
+                obj.common.type = newType
+            }
+        }
+    }
+
     async updateNativeData() {
-        this.log.info("Updating Metainformation of Parameters...");
+        this.log.info("Updating meta information of parameters ...");
         // get all existing objects
         const objects = await this.getAdapterObjectsAsync();
 
