@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "bsblan",
-        "version": "0.2.2",
+        "version": "0.3.0",
         "news": {
+            "0.3.0": {
+                "en": "Add support for BSBLAN Firmware v2",
+                "de": "BSBLAN Firwmare v2 Unterstützung"
+            },
             "0.2.2": {
               "en": "Replace invalid characters for Object-IDs stated by JS-Controller",
               "de": "Ersetzt für JS-Controller üngültige Zeichen für Objekt-IDs"
@@ -65,11 +69,10 @@
             "hacki11 <jur.schmid@gmail.com>"
         ],
         "keywords": [
-            "broetje brötje mhg fujitsu elco siemens lpb heating gas heizung bsb lan"
+            "broetje brötje BBK BBS BGB BLW BMR BOB BSK SOB WBS WGB WGB_EVO WGB_Pro_EVO WGB-M WGB-U WOB MHG fujitsu ELCO Aerotop Aquatop Straton Thision Thision_S Thision_S_Plus siemens ATAG QR Atlantic Alfea_Excellia Extensa Austria_Email LWPK Baxi Luna_Platinum CTA Optiheat Froeling Fröling Rendagas_Plus Fujitsu Waterstage_Comfort WSHA WSYK WSYP Gruenenwald Grünenwald Greenheat Interdomo Domostar_GBK_25H Procon_E Olymp SHS WHS Thermital TBox Clima TOP Viessmann Vitotwin Weishaupt WTU lpb heating gas heizung heatpump bsb lan"
         ],
         "license": "MIT",
         "platform": "Javascript/Node.js",
-        "main": "main.js",
         "icon": "bsblan.png",
         "enabled": true,
         "extIcon": "https://raw.githubusercontent.com/hacki11/ioBroker.bsblan/master/admin/bsblan.png",
@@ -81,7 +84,7 @@
         "materialize": true,
         "dependencies": [
             {
-                "js-controller": ">=1.4.2"
+                "js-controller": ">=3.1"
             }
         ],
         "connectionType": "local",

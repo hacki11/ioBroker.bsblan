@@ -8,6 +8,7 @@
 // you need to create an adapter
 const utils = require("@iobroker/adapter-core");
 const BSB = require("./lib/bsb");
+const {InfoObjects} = require("./lib/config");
 
 class Bsblan extends utils.Adapter {
 
@@ -40,36 +41,47 @@ class Bsblan extends utils.Adapter {
 
         await this.migrateExistingObjects();
 
+        // only supported bsb_lan > 2.x
+        await this.updateNativeData();
+
         this.subscribeStates("*");
 
-        this.update();
+        await this.setupDefaultObjects();
+        await this.update();
     }
 
     resolveConfigValues() {
-        let values = new Set();
-        for (let line of this.config.values.split(/\r?\n/)) {
-            for (let entry of line.split(",")) {
-                let value = entry.trim();
+        const values = new Set();
+        for (const line of this.config.values.split(/\r?\n/)) {
+            for (const entry of line.split(",")) {
+                const value = entry.trim();
                 if (value.length === 0) {
                     //ignore
                 } else if (isNaN(parseInt(value))) {
-                    this.log.error(value + " is not a valid id to retrieve.")
+                    this.log.error(value + " is not a valid id to retrieve.");
                 } else {
                     values.add(entry.trim());
                 }
             }
         }
-        let valuesArray = [...values].sort();
+        const valuesArray = [...values].sort();
         this.log.info("Values found: " + valuesArray);
         return valuesArray;
     }
 
-    update() {
-        this.log.debug("Fetch values ...")
-        this.detectNewObjects(this.values)
+    async update() {
+        this.log.debug("Update default states ...");
+        await this.updateDefaultStates()
+            .catch((error) => {
+                this.errorHandler(error);
+                this.refreshTimer();
+            });
+
+        this.log.debug("Update parameters ...");
+        await this.detectNewObjects(this.values)
             .then(newValues => this.initializeParameters(newValues))
             .then(() => this.connectionHandler(true))
-            .then(() => this.bsb.query(this.values))
+            .then(() => this.bsb.getParameter(this.values))
             .then(result => this.setStates(result))
             .then(() => this.bsb.query24hAverages())
             .then(result24h => this.set24hAverages(result24h))
@@ -81,7 +93,7 @@ class Bsblan extends utils.Adapter {
     }
 
     refreshTimer() {
-        this.log.debug("Reset Timer")
+        this.log.debug("Reset Timer");
         this.timer = setTimeout(() => this.update(), this.interval);
     }
 
@@ -100,7 +112,7 @@ class Bsblan extends utils.Adapter {
                     .then(obj => this.bsb.write(obj.native.id, state.val, obj.native.bsb.dataType))
                     .then(response => {
                         this.log.debug(`Received write response: ${JSON.stringify(response)}`);
-                        return this.bsb.query(Object.keys(response));
+                        return this.bsb.getParameter(Object.keys(response));
                     })
                     .then(result => this.setStates(result))
                     .catch((error) => {
@@ -110,7 +122,7 @@ class Bsblan extends utils.Adapter {
                         } else {
                             this.errorHandler(error);
                         }
-                    })
+                    });
             }
         } else {
             // The state was deleted
@@ -122,15 +134,15 @@ class Bsblan extends utils.Adapter {
 
         if (!values || values.size === 0) return;
 
-        this.log.info("Setup new objects (" + [...values] + ") ...")
+        this.log.info("Setup new objects (" + [...values] + ") ...");
         this.categories = await this.bsb.categories();
 
-        let categoryMap = {};
+        const categoryMap = {};
 
-        for (let value of values) {
-            for (let category of Object.keys(this.categories)) {
-                if (value >= this.categories[category]['min'] && value <= this.categories[category]['max']) {
-                    var obj = {
+        for (const value of values) {
+            for (const category of Object.keys(this.categories)) {
+                if (value >= this.categories[category]["min"] && value <= this.categories[category]["max"]) {
+                    const obj = {
                         id: category,
                         native: this.categories[category],
                         values: []
@@ -144,39 +156,39 @@ class Bsblan extends utils.Adapter {
             }
         }
 
-        var queriedValues = await this.bsb.query(values);
+        const queriedValues = await this.bsb.getParameter(values);
 
-        var createdValues = new Set()
-        for (let category of Object.keys(categoryMap)) {
-            this.log.info("Fetching category " + category + " " + categoryMap[category].native.name + " ...")
+        let createdValues = new Set();
+        for (const category of Object.keys(categoryMap)) {
+            this.log.info("Fetching category " + category + " " + categoryMap[category].native.name + " ...");
             await this.bsb.category(category)
                 .then(result => this.setupCategory(categoryMap[category], result, queriedValues))
-                .then(result => createdValues = new Set([...createdValues, ...result]))
+                .then(result => createdValues = new Set([...createdValues, ...result]));
         }
 
-        this.showInvalidValues(createdValues, values)
+        this.showInvalidValues(createdValues, values);
 
-        this.log.info("Setup objects done.")
+        this.log.info("Setup objects done.");
         return createdValues;
     }
 
     showInvalidValues(createdValues, newValues) {
 
-        for (let value of newValues) {
+        for (const value of newValues) {
             if (!createdValues.has(value)) {
-                this.log.warn("Value not found, skipping: " + value)
+                this.log.warn("Value not found, skipping: " + value);
             }
         }
     }
 
     detectNewObjects(values) {
 
-        let newValues = new Set(values);
+        const newValues = new Set(values);
         return this.getAdapterObjectsAsync()
             .then(records => {
-                for (let key of Object.keys(records)) {
+                for (const key of Object.keys(records)) {
                     if (records[key].native) {
-                        let id = records[key].native.id;
+                        const id = records[key].native.id;
                         if (newValues.has(id)) {
                             newValues.delete(id);
                         }
@@ -187,32 +199,79 @@ class Bsblan extends utils.Adapter {
     }
 
     setupCategory(category, params, values) {
-        var name = category.native['name'] + " (" + category.native['min'] + " - " + category.native['max'] + ")";
+        const name = category.native["name"] + " (" + category.native["min"] + " - " + category.native["max"] + ")";
         this.log.info("Setup category " + category.id + ": " + name);
-        var createdValues = new Set();
-        for (let value of category.values) {
+        const createdValues = new Set();
+        for (const value of category.values) {
             if (params.hasOwnProperty(value)) {
                 this.setupObject(value, params[value], values[value])
-                    .catch((error) => this.errorHandler(error))
-                createdValues.add(value)
+                    .catch((error) => this.errorHandler(error));
+                createdValues.add(value);
             }
         }
         return createdValues;
     }
 
+    async setupDefaultObjects() {
+        this.log.info("Fetch device information ...");
+        await this.bsb.queryInfo()
+            .then(info => InfoObjects.map(object => this.setupDefaultObject(object, info)))
+            .catch(error => this.errorHandler(error));
+    }
+
+    async setupDefaultObject(object, info) {
+        const name = "info." + object.id;
+        if (Object.hasOwnProperty.call(info, object.id)) {
+            await this.setObjectNotExistsAsync(name, object.obj)
+                .then(response => {
+                    // if the object exists, we get an undefined
+                    if (response !== undefined) {
+                        this.log.info("Add Info Object: " + name + " " + JSON.stringify(response));
+                    }
+                })
+                .catch(error => this.errorHandler(error));
+        }
+    }
+
+    async updateDefaultStates() {
+        await this.bsb.queryInfo()
+            .then(info => this.setDefaultStates(info))
+            .catch(error => this.errorHandler(error));
+    }
+
+    async setDefaultStates(info) {
+        for (const object of InfoObjects) {
+            const name = "info." + object.id;
+            if (Object.hasOwnProperty.call(info, object.id)) {
+                // no conversion needed because BSBLAN already delivers string or number
+                await this.setStateAsync(name, {val: info[object.id], ack: true})
+                    .catch(error => this.errorHandler(error));
+            }
+        }
+    }
+
     async setupObject(key, param, value) {
-        let name = param.name + " (" + key + ")";
+        const name = param.name + " (" + key + ")";
 
         this.log.info("Add Parameter: " + name);
 
-        let obj = {
+        // bsb_lan 2.x feature
+        let write;
+        if ("readonly" in value) {
+            write = value.readonly === 0;
+        } else {
+            // bsb_lan 1.x we have to guess or hard-code
+            write = this.bsb.isReadWrite(key);
+        }
+
+        const obj = {
             type: "state",
             common: {
                 name: name,
                 type: this.mapType(param.dataType),
                 role: "value",
                 read: true,
-                write: this.bsb.isReadWrite(key, param.dataType),
+                write: write,
                 unit: this.parseUnit(value.unit)
             },
             native: {
@@ -225,17 +284,17 @@ class Bsblan extends utils.Adapter {
         }
 
 
-        this.setObjectNotExistsAsync(this.createId(key, param.name), obj)
-            .then(this.setStateAsync(this.createId(key, param.name), {val: value.value, ack: true}))
+        await this.setObjectNotExistsAsync(this.createId(key, param.name), obj)
+            .then(() => this.setStateAsync(this.createId(key, param.name), {val: value.value, ack: true}))
             .catch((error) => this.errorHandler(error));
     }
 
     async set24hAvgObject(key, param) {
-        let name = param.name + " (" + key + ")"
+        const name = param.name + " (" + key + ")";
 
-        this.log.info("Set 24h Average: " + name)
+        this.log.debug("Set 24h Average: " + name);
 
-        let obj = {
+        const obj = {
             type: "state",
             common: {
                 name: name,
@@ -250,33 +309,41 @@ class Bsblan extends utils.Adapter {
                 bsb: param,
                 avg: "24h"
             }
-        }
+        };
 
         await this.setObjectNotExistsAsync("24h", {
             type: "channel",
             common: {
                 name: "24h averages"
             }
-        })
+        });
 
         await this.setObjectNotExistsAsync("24h." + this.createId(key, param.name), obj)
-            .then(this.setStateAsync("24h." + this.createId(key, param.name), {val: param.value, ack: true}))
-            .catch((error) => this.errorHandler(error))
+            .then(() => this.setStateAsync("24h." + this.createId(key, param.name), {
+                val: this.parseValue(param.value, param.dataType),
+                ack: true
+            }))
+            .catch((error) => this.errorHandler(error));
     }
 
     async set24hAverages(data) {
-        this.log.debug("/JA Response: " + JSON.stringify(data))
+        this.log.debug("/JA Response: " + JSON.stringify(data));
 
-        for (let key of Object.keys(data)) {
-            await this.set24hAvgObject(key, data[key])
+        for (const key of Object.keys(data)) {
+            await this.set24hAvgObject(key, data[key]);
         }
     }
 
     setStates(data) {
         this.log.debug("/JQ Response: " + JSON.stringify(data));
         for (let key of Object.keys(data)) {
-            this.setStateAsync(this.createId(key, data[key].name), {val: data[key].value, ack: true})
-                .catch((error) => this.errorHandler(error));
+            this.setStateAsync(
+                this.createId(key, data[key].name),
+                {
+                    val: this.parseValue(data[key].value, data[key].dataType),
+                    ack: true
+                }
+            ).catch((error) => this.errorHandler(error));
         }
     }
 
@@ -285,9 +352,9 @@ class Bsblan extends utils.Adapter {
     }
 
     createObjectStates(possibleValues) {
-        let states = {};
-        for (let entry of possibleValues) {
-            states[entry['enumValue']] = entry['desc']
+        const states = {};
+        for (const entry of possibleValues) {
+            states[entry["enumValue"]] = entry["desc"];
         }
         return states;
     }
@@ -298,19 +365,36 @@ class Bsblan extends utils.Adapter {
             case 0:
                 return "number"; // number
             case 1:
-                return "string"; // enum
+                return "number"; // enum
             case 2:
-                return "string"; // weekday
+                return "string" // Bit value
             case 3:
-                return "string"; // hr/min
+                return "string"; // weekday
             case 4:
-                return "string"; // date/time
+                return "string"; // hr/min
             case 5:
-                return "string"; // day/month
+                return "string"; // date/time
             case 6:
+                return "string"; // day/month
+            case 7:
                 return "string"; // string
             default:
                 return "string";
+        }
+    }
+
+    parseValue(value, type) {
+        switch(type) {
+            case 0: // number
+            case 1: // enum
+                // BSB_LAN returns --- for numbers
+                // https://github.com/fredlcore/BSB-LAN/issues/469
+                if (value == '---') {
+                    return 0;
+                }
+                return parseFloat(value);
+            default: // no conversion
+                return value;
         }
     }
 
@@ -322,41 +406,85 @@ class Bsblan extends utils.Adapter {
     }
 
     async migrateExistingObjects() {
-        this.getAdapterObjectsAsync().then(objects => {
-            for (let id in objects) {
-                var obj = objects[id];
+        await this.getAdapterObjectsAsync().then(objects => {
+            for (const id in objects) {
+                const obj = objects[id];
                 if (obj.native && obj.native.bsb) {
                     this.fixReadWrite(obj);
                     this.fixEmptyStates(obj);
-
                     this.extendObject(id, obj);
-
-                    this.warnInvalidCharacters(obj)
+                    this.warnInvalidCharacters(obj);
+                    this.fixDataType(obj);
                 }
             }
         });
     }
 
     fixReadWrite(obj) {
-        var rw = this.bsb.isReadWrite(obj.native.id, obj.native.bsb.dataType);
+        // not needed for objects created from V1 firmware
+        if ("bsb" in obj.native && "readonly" in obj.native.bsb) {
+            return;
+        }
+
+        const rw = this.bsb.isReadWrite(obj.native.id);
         if (rw !== obj.common.write) {
-            this.log.info(`Migrate ${obj._id}: set write = ${rw}`)
+            this.log.info(`Migrate ${obj._id}: set write = ${rw}`);
             obj.common.write = rw;
         }
     }
 
     fixEmptyStates(obj) {
         if (obj.common.states && Object.keys(obj.common.states).length === 0) {
-            this.log.info(`Migrate ${obj._id}: remove empty states`)
+            this.log.info(`Migrate ${obj._id}: remove empty states`);
             obj.common.states = null;
         }
     }
 
     warnInvalidCharacters(obj) {
-        var newId = this.createId(obj.native.id, obj.native.bsb.name)
-        var oldId = obj._id.split('.');
-        if(oldId[oldId.length - 1] !== newId) {
-            this.log.warn(`Object ${obj._id} contains illegal characters, please delete. ${newId} will then be created automatically.`)
+        const newId = this.createId(obj.native.id, obj.native.bsb.name);
+        const oldId = obj._id.split(".");
+        if (oldId[oldId.length - 1] !== newId) {
+            this.log.warn(`Object ${obj._id} contains illegal characters, please delete. ${newId} will then be created automatically.`);
+        }
+    }
+
+    fixDataType(obj) {
+        if ("bsb" in obj.native && "dataType" in obj.native.bsb) {
+            const newType = this.mapType(obj.native.bsb.dataType)
+            if (obj.common.type != newType) {
+                this.log.info(`Migrate ${obj._id}: Change data type from ${obj.common.type} to ${newType}`)
+                obj.common.type = newType
+            }
+        }
+    }
+
+    async updateNativeData() {
+        this.log.info("Updating meta information of parameters ...");
+        // get all existing objects
+        const objects = await this.getAdapterObjectsAsync();
+
+        // convert into array of dict [iob id, bsb id]
+        const ids = {};
+        Object.values(objects)
+            .filter(obj => obj.native)
+            .filter(obj => obj.native.id)
+            .filter(obj => !isNaN(obj.native.id))
+            .map(obj => ids[parseInt(obj.native.id)] = obj);
+
+        // fetch parameter definitions (bsb_lan > 2.x)
+        const defs = await this.bsb.getParameterDefinitionAsync(Object.keys(ids))
+            .catch(error => this.errorHandler(error));
+
+        if(defs) {
+            // merge native data
+            for (const [bsb_id, obj] of Object.entries(ids)) {
+                // check if the object has a definition available
+                if (bsb_id in defs) {
+                    // update native data
+                    obj.native.bsb = defs[bsb_id];
+                    await this.setObjectAsync(obj._id, obj);
+                }
+            }
         }
     }
 
