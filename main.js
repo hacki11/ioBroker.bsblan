@@ -285,7 +285,10 @@ class Bsblan extends utils.Adapter {
 
 
         await this.setObjectNotExistsAsync(this.createId(key, param.name), obj)
-            .then(() => this.setStateAsync(this.createId(key, param.name), {val: value.value, ack: true}))
+            .then(() => this.setStateAsync(this.createId(key, param.name), {
+                val: this.parseValue(value.value, value.dataType), 
+                ack: true
+            }))
             .catch((error) => this.errorHandler(error));
     }
 
