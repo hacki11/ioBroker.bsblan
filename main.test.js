@@ -8,5 +8,5 @@
  */
 
 // tslint:disable:no-unused-expression
-
+// eslint-disable-next-line no-unused-vars
 const { expect } = require("chai");
