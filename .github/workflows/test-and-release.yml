@@ -3,15 +3,15 @@ name: Test and Release
 # Run this job on all pushes and pull requests
 # as well as tags with a semantic version
 on:
-    push:
-        branches:
-            - "*"
-        tags:
-            # normal versions
-            - "v[0-9]+.[0-9]+.[0-9]+"
-            # pre-releases
-            - "v[0-9]+.[0-9]+.[0-9]+-**"
-    pull_request: {}
+  push:
+    branches:
+      - "*"
+    tags:
+      # normal versions
+      - "v[0-9]+.[0-9]+.[0-9]+"
+      # pre-releases
+      - "v[0-9]+.[0-9]+.[0-9]+-**"
+  pull_request: {}
 
 # Cancel previous PR/branch runs when a new commit is pushed
 concurrency:
@@ -31,7 +31,6 @@ jobs:
           node-version: '18.x'
           # Uncomment the following line if your adapter cannot be installed using 'npm ci'
           # install-command: 'npm install'
-          type-checking: true
           lint: true
 
   # Runs adapter tests on all supported node versions and OSes
@@ -51,9 +50,8 @@ jobs:
           os: ${{ matrix.os }}
           # Uncomment the following line if your adapter cannot be installed using 'npm ci'
           # install-command: 'npm install'
-          build: true
 
-# TODO: To enable automatic npm releases, create a token on npmjs.org
+# TODO: To enable automatic npm releases, create a token on npmjs.org 
 # Enter this token as a GitHub secret (with name NPM_TOKEN) in the repository options
 # Then uncomment the following block:
 
@@ -63,11 +61,12 @@ jobs:
 
     # Trigger this step only when a commit on any branch is tagged with a version number
     if: |
-        contains(github.event.head_commit.message, '[skip ci]') == false &&
-        github.event_name == 'push' &&
-        startsWith(github.ref, 'refs/tags/v')
+      contains(github.event.head_commit.message, '[skip ci]') == false &&
+      github.event_name == 'push' &&
+      startsWith(github.ref, 'refs/tags/v')
 
     runs-on: ubuntu-latest
+
     # Write permissions are required to create Github releases
     permissions:
       contents: write
@@ -78,7 +77,6 @@ jobs:
           node-version: '18.x'
           # Uncomment the following line if your adapter cannot be installed using 'npm ci'
           # install-command: 'npm install'
-          build: true
           npm-token: ${{ secrets.NPM_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -88,8 +86,7 @@ jobs:
 #          # Then uncomment and customize the following block:
 #          sentry: true
 #          sentry-token: ${{ secrets.SENTRY_AUTH_TOKEN }}
-#          sentry-project: "iobroker-test"
-#          sentry-version-prefix: "iobroker.test"
-#          sentry-sourcemap-paths: "build/"
+#          sentry-project: "iobroker-bsblan"
+#          sentry-version-prefix: "iobroker.bsblan"
 #          # If your sentry project is linked to a GitHub repository, you can enable the following option
 #          # sentry-github-integration: true
