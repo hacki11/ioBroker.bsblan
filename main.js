@@ -16,6 +16,7 @@ class Bsblan extends utils.Adapter {
      * @param {Partial<ioBroker.AdapterOptions>} [options={}]
      */
     constructor(options) {
+        // @ts-ignore
         super({
             ...options,
             name: "bsblan",
@@ -30,7 +31,7 @@ class Bsblan extends utils.Adapter {
      */
     async onReady() {
         // setup timer
-        this.interval = this.config.interval || 60;
+        this.interval = Number(this.config.interval) || 60;
         this.interval *= 1000;
         if (this.interval < 10000)
             this.interval = 10000;
@@ -109,7 +110,13 @@ class Bsblan extends utils.Adapter {
                 this.log.info(`Sending write request for ${id} (value: ${state.val})`);
 
                 this.getObjectAsync(id)
-                    .then(obj => this.bsb.write(obj.native.id, state.val, obj.native.bsb.dataType))
+                    .then(obj => {
+                        if(obj && obj.native && obj.native.bsb) {
+                            return this.bsb.write(obj.native.id, state.val, obj.native.bsb.dataType);
+                        } else {
+                            this.log.error(`Error getting BSB native information from: ${id}`);
+                        }
+                    })
                     .then(response => {
                         this.log.debug(`Received write response: ${JSON.stringify(response)}`);
                         return this.bsb.getParameter(Object.keys(response));
@@ -203,7 +210,7 @@ class Bsblan extends utils.Adapter {
         this.log.info("Setup category " + category.id + ": " + name);
         const createdValues = new Set();
         for (const value of category.values) {
-            if (params.hasOwnProperty(value)) {
+            if (value in params) {
                 this.setupObject(value, params[value], values[value])
                     .catch((error) => this.errorHandler(error));
                 createdValues.add(value);
@@ -283,10 +290,10 @@ class Bsblan extends utils.Adapter {
             obj.common.states = this.createObjectStates(param.possibleValues);
         }
 
-
+        // @ts-ignore
         await this.setObjectNotExistsAsync(this.createId(key, param.name), obj)
             .then(() => this.setStateAsync(this.createId(key, param.name), {
-                val: this.parseValue(value.value, value.dataType), 
+                val: this.parseValue(value.value, value.dataType),
                 ack: true
             }))
             .catch((error) => this.errorHandler(error));
@@ -318,9 +325,11 @@ class Bsblan extends utils.Adapter {
             type: "channel",
             common: {
                 name: "24h averages"
-            }
+            },
+            native: {}
         });
 
+        // @ts-ignore
         await this.setObjectNotExistsAsync("24h." + this.createId(key, param.name), obj)
             .then(() => this.setStateAsync("24h." + this.createId(key, param.name), {
                 val: this.parseValue(param.value, param.dataType),
@@ -339,7 +348,7 @@ class Bsblan extends utils.Adapter {
 
     setStates(data) {
         this.log.debug("/JQ Response: " + JSON.stringify(data));
-        for (let key of Object.keys(data)) {
+        for (const key of Object.keys(data)) {
             this.setStateAsync(
                 this.createId(key, data[key].name),
                 {
@@ -351,7 +360,7 @@ class Bsblan extends utils.Adapter {
     }
 
     createId(key, name) {
-        return name.replace(/[\]\[*,;'"`<>’\\\s?]/g, "_").replace(/\./g, "") + "_(" + key + ")";
+        return name.replace(/[\][*,;'"`<>’\\\s?]/g, "_").replace(/\./g, "") + "_(" + key + ")";
     }
 
     createObjectStates(possibleValues) {
@@ -370,7 +379,7 @@ class Bsblan extends utils.Adapter {
             case 1:
                 return "number"; // enum
             case 2:
-                return "string" // Bit value
+                return "string"; // Bit value
             case 3:
                 return "string"; // weekday
             case 4:
@@ -392,7 +401,7 @@ class Bsblan extends utils.Adapter {
             case 1: // enum
                 // BSB_LAN returns --- for numbers
                 // https://github.com/fredlcore/BSB-LAN/issues/469
-                if (value == '---') {
+                if (value == "---") {
                     return 0;
                 }
                 return parseFloat(value);
@@ -453,10 +462,10 @@ class Bsblan extends utils.Adapter {
 
     fixDataType(obj) {
         if ("bsb" in obj.native && "dataType" in obj.native.bsb) {
-            const newType = this.mapType(obj.native.bsb.dataType)
+            const newType = this.mapType(obj.native.bsb.dataType);
             if (obj.common.type != newType) {
-                this.log.info(`Migrate ${obj._id}: Change data type from ${obj.common.type} to ${newType}`)
-                obj.common.type = newType
+                this.log.info(`Migrate ${obj._id}: Change data type from ${obj.common.type} to ${newType}`);
+                obj.common.type = newType;
             }
         }
     }
@@ -475,7 +484,7 @@ class Bsblan extends utils.Adapter {
             .map(obj => ids[parseInt(obj.native.id)] = obj);
 
         // fetch parameter definitions (bsb_lan > 2.x)
-        const defs = await this.bsb.getParameterDefinitionAsync(Object.keys(ids))
+        let defs = await this.bsb.getParameterDefinitionAsync(Object.keys(ids))
             .catch(error => this.errorHandler(error));
 
         if(defs) {
