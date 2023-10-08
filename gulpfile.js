@@ -1,3 +1,4 @@
+// @ts-nocheck
 /* eslint-disable no-unused-vars */
 /* eslint-disable prefer-const */
 /* eslint-disable no-prototype-builtins */
