@@ -145,7 +145,6 @@ class Bsblan extends utils.Adapter {
     }
 
     async initializeParameters(values) {
-
         if (!values || values.size === 0) return;
 
         this.log.info("Setup new objects (" + [...values] + ") ...");
@@ -187,7 +186,6 @@ class Bsblan extends utils.Adapter {
     }
 
     showInvalidValues(createdValues, newValues) {
-
         for (const value of newValues) {
             if (!createdValues.has(value)) {
                 this.log.warn("Value not found, skipping: " + value);
@@ -196,7 +194,6 @@ class Bsblan extends utils.Adapter {
     }
 
     detectNewObjects(values) {
-
         const newValues = new Set(values);
         return this.getAdapterObjectsAsync()
             .then(records => {
@@ -235,7 +232,7 @@ class Bsblan extends utils.Adapter {
 
     async setupDefaultObject(object, info) {
         const name = "info." + object.id;
-        if (Object.hasOwnProperty.call(info, object.id)) {
+        if (Object.prototype.hasOwnProperty.call(info, object.id)) {
             await this.setObjectNotExistsAsync(name, object.obj)
                 .then(response => {
                     // if the object exists, we get an undefined
@@ -265,7 +262,7 @@ class Bsblan extends utils.Adapter {
     }
 
     async setupObject(key, param, value) {
-        const name = param.name + " (" + key + ")";
+        const name = this.createName(param.name, key);
 
         this.log.info("Add Parameter: " + name);
 
@@ -298,8 +295,8 @@ class Bsblan extends utils.Adapter {
         }
 
         // @ts-ignore
-        await this.setObjectNotExistsAsync(this.createId(key, param.name), obj)
-            .then(() => this.setStateAsync(this.createId(key, param.name), {
+        await this.setObjectNotExistsAsync(key, obj)
+            .then(() => this.setStateAsync(key, {
                 val: this.parseValue(value.value, value.dataType),
                 ack: true
             }))
@@ -307,7 +304,7 @@ class Bsblan extends utils.Adapter {
     }
 
     async set24hAvgObject(key, param) {
-        const name = param.name + " (" + key + ")";
+        const name = this.createName(param.name, key);
 
         this.log.debug("Set 24h Average: " + name);
 
@@ -337,8 +334,8 @@ class Bsblan extends utils.Adapter {
         });
 
         // @ts-ignore
-        await this.setObjectNotExistsAsync("24h." + this.createId(key, param.name), obj)
-            .then(() => this.setStateAsync("24h." + this.createId(key, param.name), {
+        await this.setObjectNotExistsAsync("24h." + key, obj)
+            .then(() => this.setStateAsync("24h." + key, {
                 val: this.parseValue(param.value, param.dataType),
                 ack: true
             }))
@@ -356,18 +353,15 @@ class Bsblan extends utils.Adapter {
     setStates(data) {
         this.log.debug("/JQ Response: " + JSON.stringify(data));
         for (const key of Object.keys(data)) {
-            this.setStateAsync(
-                this.createId(key, data[key].name),
-                {
-                    val: this.parseValue(data[key].value, data[key].dataType),
-                    ack: true
-                }
-            ).catch((error) => this.errorHandler(error));
+            this.setStateAsync(key, {
+                val: this.parseValue(data[key].value, data[key].dataType),
+                ack: true
+            }).catch((error) => this.errorHandler(error));
         }
     }
 
-    createId(key, name) {
-        return name.replace(/[\][*,;'"`<>’\\\s?]/g, "_").replace(/\./g, "") + "_(" + key + ")";
+    createName(name, key) {
+        return name + " (" + key + ")";
     }
 
     createObjectStates(possibleValues) {
@@ -432,8 +426,9 @@ class Bsblan extends utils.Adapter {
                     this.fixReadWrite(obj);
                     this.fixEmptyStates(obj);
                     this.extendObject(id, obj);
-                    this.warnInvalidCharacters(obj);
+                    //this.warnInvalidCharacters(obj);
                     this.fixDataType(obj);
+                    this.migrateIdStrategy(obj);
                 }
             }
         });
@@ -460,7 +455,7 @@ class Bsblan extends utils.Adapter {
     }
 
     warnInvalidCharacters(obj) {
-        const newId = this.createId(obj.native.id, obj.native.bsb.name);
+        const newId = obj.native.id;
         const oldId = obj._id.split(".");
         if (oldId[oldId.length - 1] !== newId) {
             this.log.warn(`Object ${obj._id} contains illegal characters, please delete. ${newId} will then be created automatically.`);
@@ -477,6 +472,28 @@ class Bsblan extends utils.Adapter {
         }
     }
 
+    async migrateIdStrategy(obj) {
+        if("bsb" in obj.native) {
+            const oldId = obj._id.split(".");
+            // verify if state has already the new ID instead of Name+ID
+            if (oldId[oldId.length - 1] !== obj.native.id) {
+                let newId = obj.native.id;
+                if("avg" in obj.native.bsb) {
+                    newId = "24h." + newId;
+                }
+
+                // only migrate once
+                if(!this.objectExists(newId)) {
+                    this.log.info(`Migrate ${obj._id}: Change ID to ${newId}`);
+                    await this.setObjectNotExistsAsync(newId, obj);
+                } else {
+                    this.log.warn(`Please delete deprecated state manually: ${obj._id}`);
+                }
+            }
+        }
+    }
+
+
     async updateNativeData() {
         this.log.info("Updating meta information of parameters ...");
         // get all existing objects
@@ -491,20 +508,24 @@ class Bsblan extends utils.Adapter {
             .map(obj => ids[parseInt(obj.native.id)] = obj);
 
         // fetch parameter definitions (bsb_lan > 2.x)
-        const defs = await this.getBSB().getParameterDefinitionAsync(this.values)
-            .catch(error => this.errorHandler(error));
-
-        if(defs != null) {
-            // merge native data
-            for (const [bsb_id, obj] of Object.entries(ids)) {
-                // check if the object has a definition available
-                if (bsb_id in defs) {
-                    // update native data
-                    obj.native.bsb = defs[bsb_id];
-                    await this.setObjectAsync(obj._id, obj);
+        const results = {};
+        await this.getBSB().getParameterDefinitionAsync(this.values)
+            .then(result => Object.assign(results, result))
+            .then(() => this.getBSB().query24AverageDefinitions())
+            .then(result => Object.assign(results, result))
+            .then(() => {
+                // merge native data
+                for (const [bsb_id, obj] of Object.entries(ids)) {
+                    // check if the object has a definition available
+                    if (bsb_id in results) {
+                        // update native data
+                        obj.native.bsb = results[bsb_id];
+                        obj.common.name = this.createName(results[bsb_id].name, bsb_id);
+                        this.setObjectAsync(obj._id, obj);
+                    }
                 }
-            }
-        }
+            })
+            .catch(error => this.errorHandler(error));
     }
 
     errorHandler(error) {
