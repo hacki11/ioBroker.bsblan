@@ -21,6 +21,7 @@ class Bsblan extends utils.Adapter {
             ...options,
             name: "bsblan",
         });
+
         this.on("ready", this.onReady.bind(this));
         this.on("stateChange", this.onStateChange.bind(this));
         this.on("unload", this.onUnload.bind(this));
@@ -36,7 +37,6 @@ class Bsblan extends utils.Adapter {
         if (this.interval < 10000)
             this.interval = 10000;
 
-        this.bsb = new BSB(this.config.host, this.config.user, this.config.password);
 
         this.values = this.resolveConfigValues();
 
@@ -49,6 +49,13 @@ class Bsblan extends utils.Adapter {
 
         await this.setupDefaultObjects();
         await this.update();
+    }
+
+    getBSB() {
+        if(!this.bsb) {
+            this.bsb = new BSB(this.config.host, this.config.user, this.config.password);
+        }
+        return this.bsb;
     }
 
     resolveConfigValues() {
@@ -82,9 +89,9 @@ class Bsblan extends utils.Adapter {
         await this.detectNewObjects(this.values)
             .then(newValues => this.initializeParameters(newValues))
             .then(() => this.connectionHandler(true))
-            .then(() => this.bsb.getParameter(this.values))
+            .then(() => this.getBSB().getParameter(this.values))
             .then(result => this.setStates(result))
-            .then(() => this.bsb.query24hAverages())
+            .then(() => this.getBSB().query24hAverages())
             .then(result24h => this.set24hAverages(result24h))
             .then(() => this.refreshTimer())
             .catch((error) => {
@@ -112,14 +119,14 @@ class Bsblan extends utils.Adapter {
                 this.getObjectAsync(id)
                     .then(obj => {
                         if(obj && obj.native && obj.native.bsb) {
-                            return this.bsb.write(obj.native.id, state.val, obj.native.bsb.dataType);
+                            return this.getBSB().write(obj.native.id, state.val, obj.native.bsb.dataType);
                         } else {
                             this.log.error(`Error getting BSB native information from: ${id}`);
                         }
                     })
                     .then(response => {
                         this.log.debug(`Received write response: ${JSON.stringify(response)}`);
-                        return this.bsb.getParameter(Object.keys(response));
+                        return this.getBSB().getParameter(Object.keys(response));
                     })
                     .then(result => this.setStates(result))
                     .catch((error) => {
@@ -142,7 +149,7 @@ class Bsblan extends utils.Adapter {
         if (!values || values.size === 0) return;
 
         this.log.info("Setup new objects (" + [...values] + ") ...");
-        this.categories = await this.bsb.categories();
+        this.categories = await this.getBSB().categories();
 
         const categoryMap = {};
 
@@ -163,12 +170,12 @@ class Bsblan extends utils.Adapter {
             }
         }
 
-        const queriedValues = await this.bsb.getParameter(values);
+        const queriedValues = await this.getBSB().getParameter(values);
 
         let createdValues = new Set();
         for (const category of Object.keys(categoryMap)) {
             this.log.info("Fetching category " + category + " " + categoryMap[category].native.name + " ...");
-            await this.bsb.category(category)
+            await this.getBSB().category(category)
                 .then(result => this.setupCategory(categoryMap[category], result, queriedValues))
                 .then(result => createdValues = new Set([...createdValues, ...result]));
         }
@@ -221,7 +228,7 @@ class Bsblan extends utils.Adapter {
 
     async setupDefaultObjects() {
         this.log.info("Fetch device information ...");
-        await this.bsb.queryInfo()
+        await this.getBSB().queryInfo()
             .then(info => InfoObjects.map(object => this.setupDefaultObject(object, info)))
             .catch(error => this.errorHandler(error));
     }
@@ -241,7 +248,7 @@ class Bsblan extends utils.Adapter {
     }
 
     async updateDefaultStates() {
-        await this.bsb.queryInfo()
+        await this.getBSB().queryInfo()
             .then(info => this.setDefaultStates(info))
             .catch(error => this.errorHandler(error));
     }
@@ -268,7 +275,7 @@ class Bsblan extends utils.Adapter {
             write = value.readonly === 0;
         } else {
             // bsb_lan 1.x we have to guess or hard-code
-            write = this.bsb.isReadWrite(key);
+            write = this.getBSB().isReadWrite(key);
         }
 
         const obj = {
@@ -438,7 +445,7 @@ class Bsblan extends utils.Adapter {
             return;
         }
 
-        const rw = this.bsb.isReadWrite(obj.native.id);
+        const rw = this.getBSB().isReadWrite(obj.native.id);
         if (rw !== obj.common.write) {
             this.log.info(`Migrate ${obj._id}: set write = ${rw}`);
             obj.common.write = rw;
@@ -484,10 +491,10 @@ class Bsblan extends utils.Adapter {
             .map(obj => ids[parseInt(obj.native.id)] = obj);
 
         // fetch parameter definitions (bsb_lan > 2.x)
-        let defs = await this.bsb.getParameterDefinitionAsync(Object.keys(ids))
+        const defs = await this.getBSB().getParameterDefinitionAsync(this.values)
             .catch(error => this.errorHandler(error));
 
-        if(defs) {
+        if(defs != null) {
             // merge native data
             for (const [bsb_id, obj] of Object.entries(ids)) {
                 // check if the object has a definition available
