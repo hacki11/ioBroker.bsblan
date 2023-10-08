@@ -41,6 +41,8 @@ The BSB_LAN Interface brings the BSB (Boiler System Bus) to LAN. This adapter co
 
 ## Changelog
 
+### 0.3.1
+* Code Quality Improvements
 ### 0.3.0
 * Add support for BSB_LAN 2.x
 * BREAKING: Names of 24h Average values changed (e.g. Außentemperatur_(8700) => 24h Durchschnittswert. Außentemperatur_(20050))
