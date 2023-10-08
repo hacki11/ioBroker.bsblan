@@ -1,5 +1,3 @@
-const path = require("path");
-const { tests } = require("@iobroker/testing");
 const {expect} = require("chai");
 const BSB = require(__dirname + "/../lib/bsb");
 
