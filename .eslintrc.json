@@ -1,10 +1,14 @@
 {
+    "root": true,
     "env": {
         "es6": true,
         "node": true,
         "mocha": true
     },
-    "extends": "eslint:recommended",
+    "extends": [
+        "eslint:recommended"
+    ],
+    "plugins": [],
     "rules": {
         "indent": [
             "error",
@@ -14,7 +18,15 @@
             }
         ],
         "no-console": "off",
+        "no-unused-vars": [
+            "error",
+            {
+                "ignoreRestSiblings": true,
+                "argsIgnorePattern": "^_"
+            }
+        ],
         "no-var": "error",
+        "no-trailing-spaces": "error",
         "prefer-const": "error",
         "quotes": [
             "error",
@@ -30,6 +42,6 @@
         ]
     },
     "parserOptions": {
-        "ecmaVersion": 2018
+        "ecmaVersion": 2020
     }
 }

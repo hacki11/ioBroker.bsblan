@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "bsblan",
-        "version": "0.3.0",
+        "version": "0.3.1",
         "news": {
+            "0.3.1": {
+                "en": "Improve Code Quality",
+                "de": "Kleinere Qualitätsverbesserungen"
+            },
             "0.3.0": {
                 "en": "Add support for BSBLAN Firmware v2",
                 "de": "BSBLAN Firwmare v2 Unterstützung"
