@@ -13,7 +13,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git@github.com:hacki11/ioBroker.bsblan.git"
+    "url": "git+ssh://git@github.com/hacki11/ioBroker.bsblan.git"
   },
   "engines": {
     "node": ">= 16"
