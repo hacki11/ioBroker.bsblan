@@ -1,3 +1,6 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable prefer-const */
+/* eslint-disable no-prototype-builtins */
 /*!
  * ioBroker gulpfile
  * Date: 2019-01-28
