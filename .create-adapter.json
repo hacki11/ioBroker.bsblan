@@ -1,0 +1,43 @@
+{
+    "cli": true,
+    "target": "directory",
+    "adapterName": "bsblan",
+    "title": "Control BSB/PPS/LPB based heating devices using the BSB_LAN interface",
+    "description": "Connects the BSB_LAN Interface with ioBroker",
+    "keywords": [
+        "broetje brötje BBK BBS BGB BLW BMR BOB BSK SOB WBS WGB WGB_EVO WGB_Pro_EVO WGB-M WGB-U WOB MHG fujitsu ELCO Aerotop Aquatop Straton Thision Thision_S Thision_S_Plus siemens ATAG QR Atlantic Alfea_Excellia Extensa Austria_Email LWPK Baxi Luna_Platinum CTA Optiheat Froeling Fröling Rendagas_Plus Fujitsu Waterstage_Comfort WSHA WSYK WSYP Gruenenwald Grünenwald Greenheat Interdomo Domostar_GBK_25H Procon_E Olymp SHS WHS Thermital TBox Clima TOP Viessmann Vitotwin Weishaupt WTU lpb heating gas heizung heatpump bsb lan"
+    ],
+    "expert": "yes",
+    "features": [
+        "adapter"
+    ],
+    "adminFeatures": [],
+    "type": "climate-control",
+    "startMode": "daemon",
+    "connectionType": "local",
+    "dataSource": "poll",
+    "connectionIndicator": "yes",
+    "language": "JavaScript",
+    "nodeVersion": "16",
+    "adminUi": "html",
+    "tools": [
+        "ESLint",
+        "devcontainer"
+    ],
+    "i18n": "words.js",
+    "releaseScript": "no",
+    "devServer": "yes",
+    "devServerPort": 8081,
+    "indentation": "Space (4)",
+    "quotes": "double",
+    "es6class": "yes",
+    "authorName": "hacki11",
+    "authorGithub": "hacki11",
+    "authorEmail": "hacko@mailbox.org",
+    "gitRemoteProtocol": "SSH",
+    "gitCommit": "no",
+    "defaultBranch": "master",
+    "license": "MIT License",
+    "dependabot": "yes",
+    "creatorVersion": "2.5.0"
+}
