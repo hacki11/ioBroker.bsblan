@@ -367,7 +367,8 @@ class Bsblan extends utils.Adapter {
     }
 
     createId(key, name) {
-        return name.replace(/[\][*,;'"`<>’\\\s?]/g, "_").replace(/\./g, "") + "_(" + key + ")";
+        const sanitized_key = key.replace(/\./g, "_");
+        return name.replace(/[\][*,;'"`<>’\\\s?]/g, "_").replace(/\./g, "") + "_(" + sanitized_key + ")";
     }
 
     createObjectStates(possibleValues) {
