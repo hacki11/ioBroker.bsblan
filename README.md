@@ -41,6 +41,8 @@ The BSB_LAN Interface brings the BSB (Boiler System Bus) to LAN. This adapter co
 
 ## Changelog
 
+### 0.3.2
+* Support dot-separated parameters
 ### 0.3.1
 * Code Quality Improvements
 ### 0.3.0
