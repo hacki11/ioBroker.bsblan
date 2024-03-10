@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "bsblan",
-        "version": "0.3.1",
+        "version": "0.3.2",
         "news": {
+            "0.3.2": {
+                "en": "Support dot-separated parameters",
+                "de": "Unterstützung für Punkt-separierte Parameter"
+            },
             "0.3.1": {
                 "en": "Improve Code Quality",
                 "de": "Kleinere Qualitätsverbesserungen"

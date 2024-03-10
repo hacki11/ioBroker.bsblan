@@ -11,10 +11,12 @@
             "name": "Launch ioBroker Adapter",
             "skipFiles": ["<node_internals>/**"],
             "args": ["--debug", "0"],
-            "program": "node_modules/iobroker.bsblan/main.js",
-            "cwd": "${workspaceFolder}/.dev-server/default",
-            "localRoot": "${workspaceFolder}",
-            "remoteRoot": "${workspaceFolder}/.dev-server/default/node_modules/iobroker.bsblan",
+            //"program": "node_modules/iobroker.bsblan/main.js",
+            "program": "${workspaceFolder}/main.js",
+            //"cwd": "${workspaceFolder}/.dev-server/default",
+            "outFiles": ["${workspaceFolder}/build/**/*.js"],
+            //"localRoot": "${workspaceFolder}",
+            //"remoteRoot": "${workspaceFolder}/.dev-server/default/node_modules/iobroker.bsblan",
           }
     ]
 }
