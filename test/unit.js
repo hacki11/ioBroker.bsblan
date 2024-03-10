@@ -20,6 +20,69 @@ describe("BSB => trimParameterId", () => {
     });
 });
 
+describe("BSB => getId", () => {
+    const bsb = new BSB("http://host", "dummy", "password");
+
+    it(`id of 100 is 100`, async () => {
+        expect(bsb.getId("100")).to.be.equal("100");
+    });
+
+    it(`id of 100.0 is 100.0`, async () => {
+        expect(bsb.getId("100.0")).to.be.equal("100.0");
+    });
+
+    it(`id of 100!1 is 100`, async () => {
+        expect(bsb.getId("100!1")).to.be.equal("100");
+    });
+
+    it(`id of 100.0!1 is 100.0`, async () => {
+        expect(bsb.getId("100.0!1")).to.be.equal("100.0");
+    });
+});
+
+describe("BSB => getBaseId", () => {
+    const bsb = new BSB("http://host", "dummy", "password");
+
+    it(`baseId of 100 is 100`, async () => {
+        expect(bsb.getBaseId("100")).to.be.equal("100");
+    });
+
+    it(`baseId of 100.0 is 100`, async () => {
+        expect(bsb.getBaseId("100.0")).to.be.equal("100");
+    });
+
+    it(`baseId of 100!1 is 100`, async () => {
+        expect(bsb.getBaseId("100!1")).to.be.equal("100");
+    });
+
+    it(`baseId of 100.0!1 is 100`, async () => {
+        expect(bsb.getBaseId("100.0!1")).to.be.equal("100");
+    });
+});
+
+describe("BSB => valueInCategory", () => {
+    const bsb = new BSB("http://host", "dummy", "password");
+
+    it(`100 in 1..100`, async () => {
+        expect(bsb.valueInCategory("100", {min: 1, max: 100})).to.be.equal(true);
+    });
+
+    it(`100.0 in 1..100`, async () => {
+        expect(bsb.valueInCategory("100.0", {min: 1, max: 100})).to.be.equal(true);
+    });
+
+    it(`100!6 in 1..100`, async () => {
+        expect(bsb.valueInCategory("100!6", {min: 1, max: 100})).to.be.equal(true);
+    });
+
+    it(`100.1!6 in 1..100`, async () => {
+        expect(bsb.valueInCategory("100.1!6", {min: 1, max: 100})).to.be.equal(true);
+    });
+
+    it(`100 not in 1..99`, async () => {
+        expect(bsb.valueInCategory("100", {min: 1, max: 99})).to.be.equal(false);
+    });
+});
 describe("BSB => validateParameterId", () => {
     const bsb = new BSB("http://host", "dummy", "password");
 
@@ -61,6 +124,18 @@ describe("BSB => validateParameterId", () => {
 
     it(`1a1 is not valid id`, async () => {
         expect(bsb.validateParameterId("1a1")).to.be.equal(false);
+    });
+
+    it(`710!1 is a valid id`, async () => {
+        expect(bsb.validateParameterId("710!1")).to.be.equal(true);
+    });
+
+    it(`710! is not a valid id`, async () => {
+        expect(bsb.validateParameterId("710!")).to.be.equal(false);
+    });
+
+    it(`710.0!6 is a valid id`, async () => {
+        expect(bsb.validateParameterId("710.0!6")).to.be.equal(true);
     });
 });
 

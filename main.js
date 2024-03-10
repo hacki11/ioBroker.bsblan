@@ -59,16 +59,29 @@ class Bsblan extends utils.Adapter {
     }
 
     resolveConfigValues() {
+        const bsb = this.getBSB();
         const values = new Set();
         for (const line of this.config.values.split(/\r?\n/)) {
             for (const entry of line.split(",")) {
                 const value = entry.trim();
                 if (value.length === 0) {
                     //ignore
-                } else if (!this.getBSB().validateParameterId(value)) {
+                } else if (!bsb.validateParameterId(value)) {
                     this.log.error(value + " is not a valid id to retrieve.");
                 } else {
-                    values.add(this.getBSB().trimParameterId(value));
+                    // do not allow adding more than one parameter per address
+                    const id = bsb.getId(value);
+                    let unique = true;
+                    for(const setValue of values) {
+                        if(setValue != value && bsb.getId(setValue) == id) {
+                            this.log.error("Can not add parameter " + value + ". " + setValue + " already exists, only one address is supported per parameter!")
+                            unique = false;
+                            break;
+                        }
+                    }
+                    if(unique) {
+                        values.add(bsb.trimParameterId(value));
+                    }
                 }
             }
         }
@@ -155,7 +168,7 @@ class Bsblan extends utils.Adapter {
 
         for (const value of values) {
             for (const category of Object.keys(this.categories)) {
-                if (value >= this.categories[category]["min"] && value <= this.categories[category]["max"]) {
+                if (this.getBSB().valueInCategory(value, this.categories[category])) {
                     const obj = {
                         id: category,
                         native: this.categories[category],
@@ -197,7 +210,9 @@ class Bsblan extends utils.Adapter {
 
     detectNewObjects(values) {
 
-        const newValues = new Set(values);
+        // native.id stores the id without the address, so we need also to use only the part without the address
+        const newValues = new Set();
+        values.map(value => newValues.add(this.getBSB().getId(value)));
         return this.getAdapterObjectsAsync()
             .then(records => {
                 for (const key of Object.keys(records)) {
@@ -217,8 +232,9 @@ class Bsblan extends utils.Adapter {
         this.log.info("Setup category " + category.id + ": " + name);
         const createdValues = new Set();
         for (const value of category.values) {
-            if (value in params) {
-                this.setupObject(value, params[value], values[value])
+            const id = this.getBSB().getId(value);
+            if (id in params) {
+                this.setupObject(id, params[id], values[id])
                     .catch((error) => this.errorHandler(error));
                 createdValues.add(value);
             }
