@@ -74,7 +74,7 @@ class Bsblan extends utils.Adapter {
                     let unique = true;
                     for(const setValue of values) {
                         if(setValue != value && bsb.getId(setValue) == id) {
-                            this.log.error("Can not add parameter " + value + ". " + setValue + " already exists, only one address is supported per parameter!")
+                            this.log.error("Can not add parameter " + value + ". " + setValue + " already exists, only one address is supported per parameter!");
                             unique = false;
                             break;
                         }
