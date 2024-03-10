@@ -65,10 +65,10 @@ class Bsblan extends utils.Adapter {
                 const value = entry.trim();
                 if (value.length === 0) {
                     //ignore
-                } else if (isNaN(parseInt(value))) {
+                } else if (!this.getBSB().validateParameterId(value)) {
                     this.log.error(value + " is not a valid id to retrieve.");
                 } else {
-                    values.add(entry.trim());
+                    values.add(this.getBSB().trimParameterId(value));
                 }
             }
         }
@@ -488,8 +488,8 @@ class Bsblan extends utils.Adapter {
         Object.values(objects)
             .filter(obj => obj.native)
             .filter(obj => obj.native.id)
-            .filter(obj => !isNaN(obj.native.id))
-            .map(obj => ids[parseInt(obj.native.id)] = obj);
+            .filter(obj => !this.getBSB().validateParameterId(obj.native.id))
+            .map(obj => ids[obj.native.id] = obj);
 
         // fetch parameter definitions (bsb_lan > 2.x)
         const defs = await this.getBSB().getParameterDefinitionAsync(this.values)
