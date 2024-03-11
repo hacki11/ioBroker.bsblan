@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "bsblan",
-        "version": "0.3.2",
+        "version": "0.3.3",
         "news": {
+            "0.3.3": {
+                "en": "Support individual addressing methods e.g. 710!7",
+                "de": "Unterstüzung für individuelle Adressierung wie 710!7"
+            },
             "0.3.2": {
                 "en": "Support dot-separated parameters",
                 "de": "Unterstützung für Punkt-separierte Parameter"
