@@ -40,6 +40,8 @@ The BSB_LAN Interface brings the BSB (Boiler System Bus) to LAN. This adapter co
 - Numbers, Enums and hr:min types are now writable (of course only writable IDs can be written)
 
 ## Changelog
+### 0.3.4
+
 ### 0.3.3
 * Support for individual addressing methods e.g. `710!7`
 
@@ -82,7 +84,7 @@ The BSB_LAN Interface brings the BSB (Boiler System Bus) to LAN. This adapter co
 ## License
 MIT License
 
-Copyright (c) 2023 hacki11
+Copyright (c) 2024 hacki11
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
