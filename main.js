@@ -9,6 +9,7 @@
 const utils = require("@iobroker/adapter-core");
 const BSB = require("./lib/bsb");
 const {InfoObjects} = require("./lib/config");
+const bsbutils = require("./lib/bsb_utils");
 
 class Bsblan extends utils.Adapter {
 
@@ -85,7 +86,7 @@ class Bsblan extends utils.Adapter {
                 }
             }
         }
-        const valuesArray = [...values].sort();
+        const valuesArray = [...values].sort(bsbutils.bsbSort);
         this.log.info("Values found: " + valuesArray);
         return valuesArray;
     }

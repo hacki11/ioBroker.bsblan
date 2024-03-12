@@ -1,6 +1,7 @@
 const {expect} = require("chai");
 const { describe, it } = require("node:test");
 const BSB = require(__dirname + "/../lib/bsb");
+const bsbutils = require(__dirname + "/../lib/bsb_utils");
 
 // Run unit tests - See https://github.com/ioBroker/testing for a detailed explanation and further options
 // tests.unit(path.join(__dirname, ".."));
@@ -189,5 +190,29 @@ describe("BSB => convert", () => {
         const expected = "04:12-21:00_xx:xx-xx:xx_xx:xx-xx:xx";
         const input = "1. 04:12-21:00 2. --:-- - --:-- 3. --:-- - --:--";
         expect(bsb.convertToBsb(input, 9)).to.be.equal(expected);
+    });
+});
+
+describe("bsb_utils => bsbcode", () => {
+
+    it(`100 should be 000100`, async () => {
+        expect(bsbutils.bsbcode("100")).to.be.equal("000100.0");
+    });
+
+    it(`20000.0 should be 020000.0`, async () => {
+        expect(bsbutils.bsbcode("20000.0")).to.be.equal("020000.0");
+    });
+
+    it(`81!8 should be 800081`, async () => {
+        expect(bsbutils.bsbcode("81!8")).to.be.equal("800081.0");
+    });
+});
+
+describe("bsb_utils => bsbSort", () => {
+
+    it(`parameters should be sorted by parameter, address and destination`, async () => {
+        const values = ["81!8", "20200.1!2", "100", "110!1", "710!7", "110!0"];
+        values.sort(bsbutils.bsbSort);
+        expect(values).deep.equal(["100", "110!0", "110!1", "20200.1!2", "710!7", "81!8"]);
     });
 });

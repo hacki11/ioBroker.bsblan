@@ -17,6 +17,13 @@
             "outFiles": ["${workspaceFolder}/build/**/*.js"],
             //"localRoot": "${workspaceFolder}",
             //"remoteRoot": "${workspaceFolder}/.dev-server/default/node_modules/iobroker.bsblan",
+          },
+          {
+            "type": "node-terminal",
+            "name": "Debug Test File",
+            "request": "launch",
+            "command": "npm run test -- ${fileBasenameNoExtension}",
+            "cwd": "${fileDirname}"
           }
     ]
 }
