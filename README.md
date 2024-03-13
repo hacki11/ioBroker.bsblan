@@ -40,9 +40,10 @@ The BSB_LAN Interface brings the BSB (Boiler System Bus) to LAN. This adapter co
 - Numbers, Enums and hr:min types are now writable (of course only writable IDs can be written)
 
 ## Changelog
+### 0.3.4
+* Fix order of individual destinations (They need to be queried sorted by destination, starting with default destination)
 ### 0.3.3
-* Support for individual addressing methods e.g. `710!7`
-
+* Support for individual destinations e.g. `710!7`
 ### 0.3.2
 * Support dot-separated parameter ids like `20200.0`, `20200.1`. `.0` is omitted from object view as it is also omitted in the bsb_lan response.
 
