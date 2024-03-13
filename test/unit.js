@@ -84,6 +84,7 @@ describe("BSB => valueInCategory", () => {
         expect(bsb.valueInCategory("100", {min: 1, max: 99})).to.be.equal(false);
     });
 });
+
 describe("BSB => validateParameterId", () => {
     const bsb = new BSB("http://host", "dummy", "password");
 
