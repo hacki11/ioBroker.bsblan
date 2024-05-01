@@ -19,7 +19,7 @@
     "node": ">= 16"
   },
   "dependencies": {
-    "@iobroker/adapter-core": "^3.0.4",
+    "@iobroker/adapter-core": "^3.1.4",
     "p-queue": "^6.6.1",
     "promise-request-retry": "^1.0.2",
     "request": "^2.88.2",
