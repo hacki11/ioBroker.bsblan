@@ -316,6 +316,7 @@ class Bsblan extends utils.Adapter {
             obj.common.states = this.createObjectStates(param.possibleValues);
         }
 
+        // @ts-expect-error "unclear why obj should not be the right type"
         await this.setObjectNotExistsAsync(this.createId(key, param.name), obj)
             .then(() =>
                 this.setStateAsync(this.createId(key, param.name), {
@@ -356,6 +357,7 @@ class Bsblan extends utils.Adapter {
             native: {},
         });
 
+        // @ts-expect-error "unclear why obj should not be the right type"
         await this.setObjectNotExistsAsync(`24h.${this.createId(key, param.name)}`, obj)
             .then(() =>
                 this.setStateAsync(`24h.${this.createId(key, param.name)}`, {
