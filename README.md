@@ -45,6 +45,9 @@ The BSB_LAN Interface brings the BSB (Boiler System Bus) to LAN. This adapter co
 -->
 
 ### **WORK IN PROGRESS**
+* Maintenance release
+* Setup Eslint 9, Prettier and Dev Container
+* Migrate to newest adapter-creator version
 
 ### 0.3.4
 * Fix order of individual destinations (They need to be queried sorted by destination, starting with default destination)
