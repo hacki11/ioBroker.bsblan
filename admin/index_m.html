@@ -3,7 +3,7 @@
 <head>
 
     <!-- Load ioBroker scripts and styles-->
-    <link rel="stylesheet" type="text/css" href="../../css/adapter.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/adapter.css" />
     <link rel="stylesheet" type="text/css" href="../../lib/css/materialize.css">
 
     <script type="text/javascript" src="../../lib/js/jquery-3.2.1.min.js"></script>
@@ -14,7 +14,7 @@
     <script type="text/javascript" src="../../js/adapter-settings.js"></script>
 
     <!-- Load our own files -->
-    <link rel="stylesheet" type="text/css" href="style.css"/>
+    <link rel="stylesheet" type="text/css" href="style.css" />
     <script type="text/javascript" src="words.js"></script>
 
     <script type="text/javascript">
@@ -29,13 +29,13 @@
                     // do not call onChange direct, because onChange could expect some arguments
                     $key.prop('checked', settings[id])
                         .on('change', () => onChange())
-                    ;
+                        ;
                 } else {
                     // do not call onChange direct, because onChange could expect some arguments
                     $key.val(settings[id])
                         .on('change', () => onChange())
                         .on('keyup', () => onChange())
-                    ;
+                        ;
                 }
             });
             onChange(false);
@@ -60,30 +60,28 @@
             });
             callback(obj);
         }
-
-
     </script>
 
 </head>
 
 <body>
 
-<div class="m adapter-container">
+    <div class="m adapter-container">
 
-    <div class="row">
-        <div class="col s12 m4 l2">
-            <img src="bsblan.png" class="logo">
+        <div class="row">
+            <div class="col s12 m4 l2">
+                <img src="bsblan.png" class="logo">
+            </div>
         </div>
-    </div>
 
-    <!-- Put your content here -->
+        <!-- Put your content here -->
 
-    <!-- For example columns with settings: -->
-    <div class="row">
+        <!-- For example columns with settings: -->
+        <div class="row">
         <div class="col s12 m5">
             <input id="host" class="value"/>
             <label for="host" class="translate">Host/IP</label>
-        </div>
+            </div>
         <div class="col s12 m2">
             <input id="user" class="value"/>
             <label for="user" class="translate">Username</label>
@@ -105,7 +103,7 @@
     </div>
 
 
-</div>
+    </div>
 
 </body>
 
