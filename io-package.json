@@ -5,59 +5,185 @@
         "news": {
             "0.3.4": {
                 "en": "Fix query order of individual destinations",
-                "de": "Korrektur der Reihenfolge individualler Zieladressen"
+                "de": "Korrektur der Reihenfolge individualler Zieladressen",
+                "ru": "Исправить заказ запроса отдельных направлений",
+                "pt": "Corrija a ordem de consulta de destinos individuais",
+                "nl": "Farse -volgorde van individuele bestemmingen repareren",
+                "fr": "Correction de l'ordre de requête des destinations individuelles",
+                "it": "Correggi l'ordine di query delle singole destinazioni",
+                "es": "Arreglar el orden de consulta de destinos individuales",
+                "pl": "Napraw kolejność zapytania poszczególnych miejsc docelowych",
+                "uk": "Виправити порядок запитів окремих напрямків",
+                "zh-cn": "修复各个目的地的查询顺序"
             },
             "0.3.3": {
                 "en": "Support individual addressing methods e.g. 710!7",
-                "de": "Unterstüzung für individuelle Adressierung wie 710!7"
+                "de": "Unterstüzung für individuelle Adressierung wie 710!7",
+                "ru": "Поддержка отдельных методов обращения, например 710! 7",
+                "pt": "Suportar métodos de endereçamento individuais, p. 710! 7",
+                "nl": "Ondersteuning van individuele adresseringsmethoden, b.v. 710! 7",
+                "fr": "Soutenir les méthodes d'adressage individuelles, par ex. 710! 7",
+                "it": "Supportare i singoli metodi di indirizzamento, ad es. 710! 7",
+                "es": "Apoya los métodos de direccionamiento individual, p. 710! 7",
+                "pl": "Wspieraj indywidualne metody adresowania, np. 710! 7",
+                "uk": "Підтримуйте індивідуальні методи звернення, наприклад 710! 7",
+                "zh-cn": "支持单个解决方法，例如710！7"
             },
             "0.3.2": {
                 "en": "Support dot-separated parameters",
-                "de": "Unterstützung für Punkt-separierte Parameter"
+                "de": "Unterstützung für Punkt-separierte Parameter",
+                "ru": "Поддержка DOT-разделенные параметры",
+                "pt": "Suporte parâmetros separados por pontos",
+                "nl": "Ondersteuning van punt-gescheiden parameters",
+                "fr": "Soutenir les paramètres séparés par DOT",
+                "it": "Supportare i parametri separati a punti",
+                "es": "Soporte de parámetros separados por DOT",
+                "pl": "Obsługuj parametry rozdzielone przez kropki",
+                "uk": "Підтримуйте параметри, розділені DOT",
+                "zh-cn": "支持点分隔参数"
             },
             "0.3.1": {
                 "en": "Improve Code Quality",
-                "de": "Kleinere Qualitätsverbesserungen"
+                "de": "Kleinere Qualitätsverbesserungen",
+                "ru": "Улучшить качество кода",
+                "pt": "Melhorar a qualidade do código",
+                "nl": "De codekwaliteit verbeteren",
+                "fr": "Améliorer la qualité du code",
+                "it": "Migliorare la qualità del codice",
+                "es": "Mejorar la calidad del código",
+                "pl": "Popraw jakość kodu",
+                "uk": "Поліпшити якість коду",
+                "zh-cn": "提高代码质量"
             },
             "0.3.0": {
                 "en": "Add support for BSBLAN Firmware v2",
-                "de": "BSBLAN Firwmare v2 Unterstützung"
+                "de": "BSBLAN Firwmare v2 Unterstützung",
+                "ru": "Добавьте поддержку для BSBLAN Perrdware v2",
+                "pt": "Adicione suporte ao firmware bsblan v2",
+                "nl": "Ondersteuning toevoegen voor BSblan Firmware V2",
+                "fr": "Ajouter la prise en charge du firmware bsblan v2",
+                "it": "Aggiungi supporto per il firmware BSblan V2",
+                "es": "Agregar soporte para el firmware BSBLAN V2",
+                "pl": "Dodaj obsługę oprogramowania układowego BSBLAN V2",
+                "uk": "Додайте підтримку прошивки BSBLAN V2",
+                "zh-cn": "添加对BSBLAN固件V2的支持"
             },
             "0.2.2": {
-              "en": "Replace invalid characters for Object-IDs stated by JS-Controller",
-              "de": "Ersetzt für JS-Controller üngültige Zeichen für Objekt-IDs"
+                "en": "Replace invalid characters for Object-IDs stated by JS-Controller",
+                "de": "Ersetzt für JS-Controller üngültige Zeichen für Objekt-IDs",
+                "ru": "Замените недействительные символы для объектов-id, указанных JS-Controller",
+                "pt": "Substitua caracteres inválidos por IDs de objetos declarados pelo JS-Controller",
+                "nl": "Vervang ongeldige tekens voor object-ID's vermeld door JS-Controller",
+                "fr": "Remplacez les caractères non valides pour les ID objet indiqués par JS-contrôleur",
+                "it": "Sostituisci i caratteri non validi per gli ID oggetti indicati da JS-Controller",
+                "es": "Reemplace los caracteres no válidos para los ID de objetos establecidos por JS-Controller",
+                "pl": "Wymień nieprawidłowe znaki dla identyfikatorów obiektowych podane przez JS-Controller",
+                "uk": "Замініть недійсні символи для об'єктів, зазначених JS-контролером",
+                "zh-cn": "替换JS-Controller所说的对象ID的无效字符"
             },
             "0.2.1": {
                 "en": "Fix write issue with new bsb_lan2 firmware",
-                "de": "Behebt ein Problem beim Schreiben von Werten mit der neuen bsb_lan2 Firmware"
+                "de": "Behebt ein Problem beim Schreiben von Werten mit der neuen bsb_lan2 Firmware",
+                "ru": "Исправить проблему записи с новой прошивкой BSB_LAN2",
+                "pt": "Corrija o problema de gravação com o novo firmware BSB_LAN2",
+                "nl": "Probleem op te lossen met nieuwe BSB_LAN2 -firmware",
+                "fr": "Correction d'un problème d'écriture avec le nouveau firmware BSB_LAN2",
+                "it": "Correggi il problema di scrittura con il nuovo firmware BSB_LAN2",
+                "es": "Se corrigió el problema de escritura con el nuevo firmware BSB_LAN2",
+                "pl": "Napraw problem z pisaniem z nowym oprogramowaniem układowym BSB_LAN2",
+                "uk": "Виправити проблему запису з новою прошивкою BSB_LAN2",
+                "zh-cn": "修复新的BSB_LAN2固件的写入问题"
             },
             "0.2.0": {
                 "en": "Add 24h averages (needs BSB_LAN FW 1.1)",
-                "de": "Unterstützung für 24h Durchschnittswerte (ab BSB_LAN FW 1.1)"
+                "de": "Unterstützung für 24h Durchschnittswerte (ab BSB_LAN FW 1.1)",
+                "ru": "Добавить средние значения 24 часа (необходимо BSB_LAN FW 1.1)",
+                "pt": "Adicione as médias 24h (precisa de BSB_LAN FW 1.1)",
+                "nl": "Voeg 24 uur gemiddelden toe (heeft BSB_LAN FW 1.1)",
+                "fr": "Ajoutez des moyennes 24h (Besoin de BSB_LAN FW 1.1)",
+                "it": "Aggiungi media 24h (necessita di BSB_LAN FW 1.1)",
+                "es": "Agregar promedios de 24 h (necesita BSB_LAN FW 1.1)",
+                "pl": "Dodaj średnie 24H (potrzebuje BSB_LAN FW 1.1)",
+                "uk": "Додайте середні показники (потребують BSB_LAN FW 1.1)",
+                "zh-cn": "添加24H平均值（需要BSB_LAN FW 1.1）"
             },
             "0.1.5": {
                 "en": "Config changed: 8700 readonly, 10003 writeType:1",
-                "de": "Konfiguration geändert: 8700 readonly, 10003 writeType:1"
+                "de": "Konfiguration geändert: 8700 readonly, 10003 writeType:1",
+                "ru": "Конфигурация изменена: 8700 Readonly, 10003 WriteType: 1",
+                "pt": "Config Alterado: 8700 readonly, 10003 Writetetype: 1",
+                "nl": "Config gewijzigd: 8700 -alleen, 10003 Writetype: 1",
+                "fr": "Config modifié: 8700 readonly, 10003 writeType: 1",
+                "it": "Config modificata: 8700 Readonly, 10003 WriteType: 1",
+                "es": "Configuración cambiada: 8700 Readonly, 10003 WriteType: 1",
+                "pl": "Config Zmieniono: 8700 Readonly, 10003 WriteType: 1",
+                "uk": "Змінено конфігурацію: 8700 Readonly, 10003 WriteType: 1",
+                "zh-cn": "配置更改：8700 ReadOnly，10003 WriteType：1"
             },
             "0.1.4": {
                 "en": "tbd",
-                "de": "tbd"
+                "de": "tbd",
+                "ru": "TBD",
+                "pt": "TBD",
+                "nl": "TBD",
+                "fr": "TBD",
+                "it": "TBD",
+                "es": "TBD",
+                "pl": "TBD",
+                "uk": "TBD",
+                "zh-cn": "TBD"
             },
             "0.1.3": {
                 "en": "Bugfix: Amount of IDs were silently limited",
-                "de": "Bugfix: Menge an IDs wurde begrenzt"
+                "de": "Bugfix: Menge an IDs wurde begrenzt",
+                "ru": "Bugfix: количество идентификаторов было тихо ограничено",
+                "pt": "Bugfix: a quantidade de IDs era silenciosamente limitada",
+                "nl": "Bugfix: hoeveelheid ID's was stil beperkt",
+                "fr": "BugFix: la quantité d'identifices était silencieusement limitée",
+                "it": "Bugfix: la quantità di ID era silenziosamente limitata",
+                "es": "Bugfix: la cantidad de IDS se limitó en silencio",
+                "pl": "Bugfix: Ilość identyfikatorów była cicho ograniczona",
+                "uk": "Помилка: кількість ідентифікаторів мовчки обмежені",
+                "zh-cn": "BugFix：ID数量默默限制"
             },
-            "0.1.2":{
+            "0.1.2": {
                 "en": "Support INF interface for setting external room temperatures",
-                "de": "Unterstützung der INF Schnittstelle um externe Raumtemperaturen zu übermitteln"
+                "de": "Unterstützung der INF Schnittstelle um externe Raumtemperaturen zu übermitteln",
+                "ru": "Поддержка интерфейса Inf для установки внешней температуры комнаты",
+                "pt": "Suporte a interface inf para definir temperaturas externas da sala",
+                "nl": "Ondersteuning Inf -interface voor het instellen van externe kamertemperaturen",
+                "fr": "Prise en charge de l'interface INF pour définir les températures de la pièce externe",
+                "it": "Supportare l'interfaccia INF per l'impostazione delle temperature della stanza esterna",
+                "es": "Soporte de la interfaz INF para establecer temperaturas ambientales externas",
+                "pl": "Wsparcie interfejsu Inf w celu ustawiania zewnętrznych temperatur pokoju",
+                "uk": "Підтримуйте інтерфейс INF для встановлення зовнішніх температур кімнати",
+                "zh-cn": "支持用于设置外部房间温度的INF界面"
             },
-            "0.1.1":{
+            "0.1.1": {
                 "en": "Support for micro and bugfixes",
-                "de": "Unterstützung der Einheit micro und Bugfixes"
+                "de": "Unterstützung der Einheit micro und Bugfixes",
+                "ru": "Поддержка Micro и ошибок",
+                "pt": "Suporte para micro e bugs",
+                "nl": "Ondersteuning voor micro- en bugfixes",
+                "fr": "Prise en charge des micro et bugs",
+                "it": "Supporto per micro e fisi bug",
+                "es": "Soporte para micro y correcciones de errores",
+                "pl": "Obsługa mikro i błędów",
+                "uk": "Підтримка мікро- та помилок",
+                "zh-cn": "支持微型和错误文件"
             },
             "0.1.0": {
                 "en": "Support writing values to BSB_LAN Interface to control the device",
-                "de": "Unterstützung zum Schreiben von Werten und damit das Steuern des Heizgeräts"
+                "de": "Unterstützung zum Schreiben von Werten und damit das Steuern des Heizgeräts",
+                "ru": "Поддержка написания значений в интерфейс BSB_LAN для управления устройством",
+                "pt": "Suportar valores de gravação na interface BSB_LAN para controlar o dispositivo",
+                "nl": "Ondersteun het schrijven van waarden naar BSB_LAN -interface om het apparaat te bedienen",
+                "fr": "Prise en charge des valeurs d'écriture à l'interface BSB_LAN pour contrôler l'appareil",
+                "it": "Supportare i valori di scrittura all'interfaccia BSB_LAN per controllare il dispositivo",
+                "es": "Admitir valores de escritura a la interfaz BSB_LAN para controlar el dispositivo",
+                "pl": "Obsługuj wartości pisania do interfejsu BSB_LAN w celu sterowania urządzeniem",
+                "uk": "Підтримка значення запису в інтерфейсі BSB_LAN для управління пристроєм",
+                "zh-cn": "支持对BSB_LAN接口的写作值以控制设备"
             },
             "0.0.1": {
                 "en": "initial release",
@@ -99,7 +225,9 @@
             "uk": "Підключає інтерфейс BSB_LAN з iObroker",
             "zh-cn": "将BSB_LAN接口与iObroker连接"
         },
-        "authors": ["hacki11 <hacko@mailbox.org>"],
+        "authors": [
+            "hacki11 <hacko@mailbox.org>"
+        ],
         "keywords": [
             "broetje brötje BBK BBS BGB BLW BMR BOB BSK SOB WBS WGB WGB_EVO WGB_Pro_EVO WGB-M WGB-U WOB MHG fujitsu ELCO Aerotop Aquatop Straton Thision Thision_S Thision_S_Plus siemens ATAG QR Atlantic Alfea_Excellia Extensa Austria_Email LWPK Baxi Luna_Platinum CTA Optiheat Froeling Fröling Rendagas_Plus Fujitsu Waterstage_Comfort WSHA WSYK WSYP Gruenenwald Grünenwald Greenheat Interdomo Domostar_GBK_25H Procon_E Olymp SHS WHS Thermital TBox Clima TOP Viessmann Vitotwin Weishaupt WTU lpb heating gas heizung heatpump bsb lan"
         ],
