@@ -1,7 +1,7 @@
 "use strict";
 
 /*
- * Created with @iobroker/create-adapter v1.16.0
+ * Created with @iobroker/create-adapter v2.6.5
  */
 
 // The adapter-core module gives you access to the core ioBroker functions
@@ -12,17 +12,14 @@ const {InfoObjects} = require("./lib/config");
 const bsbutils = require("./lib/bsb_utils");
 
 class Bsblan extends utils.Adapter {
-
     /**
-     * @param {Partial<ioBroker.AdapterOptions>} [options={}]
+     * @param {Partial<utils.AdapterOptions>} [options={}]
      */
     constructor(options) {
-        // @ts-ignore
         super({
             ...options,
             name: "bsblan",
         });
-
         this.on("ready", this.onReady.bind(this));
         this.on("stateChange", this.onStateChange.bind(this));
         this.on("unload", this.onUnload.bind(this));
@@ -559,9 +556,11 @@ class Bsblan extends utils.Adapter {
     }
 }
 
-// @ts-ignore parent is a valid property on module
-if (module && module.parent) {
+if (require.main !== module) {
     // Export the constructor in compact mode
+    /**
+     * @param {Partial<utils.AdapterOptions>} [options={}]
+     */
     module.exports = (options) => new Bsblan(options);
 } else {
     // otherwise start the instance directly
