@@ -30,3 +30,8 @@ label > i[title] {
 }
 
 /* Add your styles here */
+/* admin overrides .hiddendiv with display: none -> textarea will not autoresize */
+.hiddendiv {
+    visibility: hidden;
+    display: block;
+}
