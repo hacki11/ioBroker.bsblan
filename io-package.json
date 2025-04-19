@@ -69,41 +69,69 @@
                 "it": "Versione iniziale",
                 "es": "Versión inicial",
                 "pl": "Pierwsze wydanie",
+                "uk": "Початкова версія",
                 "zh-cn": "首次出版"
             }
         },
         "titleLang": {
             "en": "Control BSB/PPS/LPB based heating devices using the BSB_LAN interface",
-            "de": "Steuerung BSB/PPS/LPB basierter Brennwerthermen und Wärmepumpen"
+            "de": "Steuerung von BSB/PPS/LPB -basierten Heizgeräten unter Verwendung der Schnittstelle BSB_LAN",
+            "ru": "Управление нагревательными устройствами на основе BSB/PPS/LPB с использованием интерфейса BSB_LAN",
+            "pt": "Controle dispositivos de aquecimento baseados em BSB/PPS/LPB usando a interface BSB_LAN",
+            "nl": "Controleer BSB/PPS/LPB -gebaseerde verwarmingsapparaten met behulp van de BSB_LAN -interface",
+            "fr": "Contrôler les périphériques de chauffage basés sur BSB / PPS / LPB à l'aide de l'interface BSB_LAN",
+            "it": "Controllo dispositivi di riscaldamento basati su BSB/PPS/LPB utilizzando l'interfaccia BSB_LAN",
+            "es": "Control de dispositivos de calentamiento basados ​​en BSB/PPS/LPB utilizando la interfaz BSB_LAN",
+            "pl": "Kontrola urządzeń grzewczych opartych na BSB/PPS/LPB za pomocą interfejsu BSB_LAN",
+            "uk": "Контроль BSB/PPS/LPB пристрої на основі LPB за допомогою інтерфейсу BSB_LAN",
+            "zh-cn": "使用BSB_LAN接口控制BSB/PPS/LPB的加热设备"
         },
         "desc": {
             "en": "Connects the BSB_LAN Interface with ioBroker",
-            "de": "Verbindet das BSB_LAN Interface mit ioBroker"
+            "de": "Verbindet die Schnittstelle BSB_LAN mit IOBROKER",
+            "ru": "Подключает интерфейс BSB_LAN с iobroker",
+            "pt": "Conecta a interface BSB_LAN com o IOBROKER",
+            "nl": "Verbindt de BSB_LAN -interface met iObRoker",
+            "fr": "Connecte l'interface BSB_LAN avec IOBROKER",
+            "it": "Collega l'interfaccia BSB_LAN con IoBroker",
+            "es": "Conecta la interfaz BSB_LAN con IOBROKER",
+            "pl": "Łączy interfejs BSB_LAN z IOBRAKER",
+            "uk": "Підключає інтерфейс BSB_LAN з iObroker",
+            "zh-cn": "将BSB_LAN接口与iObroker连接"
         },
-        "authors": [
-            "hacki11 <jur.schmid@gmail.com>"
-        ],
+        "authors": ["hacki11 <hacko@mailbox.org>"],
         "keywords": [
             "broetje brötje BBK BBS BGB BLW BMR BOB BSK SOB WBS WGB WGB_EVO WGB_Pro_EVO WGB-M WGB-U WOB MHG fujitsu ELCO Aerotop Aquatop Straton Thision Thision_S Thision_S_Plus siemens ATAG QR Atlantic Alfea_Excellia Extensa Austria_Email LWPK Baxi Luna_Platinum CTA Optiheat Froeling Fröling Rendagas_Plus Fujitsu Waterstage_Comfort WSHA WSYK WSYP Gruenenwald Grünenwald Greenheat Interdomo Domostar_GBK_25H Procon_E Olymp SHS WHS Thermital TBox Clima TOP Viessmann Vitotwin Weishaupt WTU lpb heating gas heizung heatpump bsb lan"
         ],
-        "license": "MIT",
+        "licenseInformation": {
+            "type": "free",
+            "license": "MIT"
+        },
         "platform": "Javascript/Node.js",
         "icon": "bsblan.png",
         "enabled": true,
         "extIcon": "https://raw.githubusercontent.com/hacki11/ioBroker.bsblan/master/admin/bsblan.png",
         "readme": "https://github.com/hacki11/ioBroker.bsblan/blob/master/README.md",
         "loglevel": "info",
+        "tier": 3,
         "mode": "daemon",
         "type": "climate-control",
         "compact": true,
-        "materialize": true,
+        "connectionType": "local",
+        "dataSource": "poll",
+        "adminUI": {
+            "config": "materialize"
+        },
         "dependencies": [
             {
-                "js-controller": ">=3.1"
+                "js-controller": ">=6.0.11"
             }
         ],
-        "connectionType": "local",
-        "dataSource": "poll"
+        "globalDependencies": [
+            {
+                "admin": "7.0.23"
+            }
+        ]
     },
     "native": {
         "host": "",
