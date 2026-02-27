@@ -1,21 +1,8 @@
 {
   "common": {
     "name": "bsblan",
-    "version": "0.3.5-alpha.0",
+    "version": "0.3.4",
     "news": {
-      "0.3.5-alpha.0": {
-        "en": "Maintenance release\nSetup Eslint 9, Prettier and Dev Container\nMigrate to newest adapter-creator version",
-        "de": "Freigabe der Wartung\nSetup Eslint 9, Prettier und Dev Container\nMigration auf neueste Adapter-Kreator-Version",
-        "ru": "Освобождение от технического обслуживания\nНастройка Eslint 9, Prettier и Dev Container\nПереход на новейшую версию адаптера-создателя",
-        "pt": "Libertação da manutenção\nConfigurar Eslint 9, mais bonito e Dev Container\nMigrar para a versão mais nova adaptador-criador",
-        "nl": "Onderhoud\nEslint 9, Prettiger en Dev Container instellen\nMigreren naar de nieuwste adapter-creator versie",
-        "fr": "Maintenance libérée\nSetup Eslint 9, Prettier et Dev Conteneur\nMigrer vers la nouvelle version adaptateur-créateur",
-        "it": "Rilascio manutenzione\nSetup Eslint 9, Prettier e Dev Container\nMigrare alla versione più nuova dell'adattatore-creatore",
-        "es": "Liberación de mantenimiento\nConfiguración Eslint 9, Prettier y Dev Container\nMigrar a la versión más reciente del adaptador-creador",
-        "pl": "Utrzymanie\nSetup Eslint 9, Prettier i Dev Container\nPrzejdź do najnowszej wersji adapter-twórca",
-        "uk": "Відеоспостереження\nНалаштування Eslint 9, Prettier і Dev Контейнер\nМіграція до найновішої версії адаптера",
-        "zh-cn": "维持费释放\n设置 Eslint 9、Pretier和Dev集装箱\n迁移到最新的适配器-生成器版本"
-      },
       "0.3.4": {
         "en": "Fix query order of individual destinations",
         "de": "Korrektur der Reihenfolge individualler Zieladressen",
