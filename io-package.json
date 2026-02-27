@@ -211,6 +211,9 @@
       }
     ]
   },
+  "protectedNative": [
+    "password"
+  ],
   "encryptedNative": [
     "password"
   ],
