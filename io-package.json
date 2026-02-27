@@ -29,19 +29,6 @@
         "uk": "Виправити порядок запитів окремих напрямків",
         "zh-cn": "修复各个目的地的查询顺序"
       },
-      "0.3.3": {
-        "en": "Support individual addressing methods e.g. 710!7",
-        "de": "Unterstüzung für individuelle Adressierung wie 710!7",
-        "ru": "Поддержка отдельных методов обращения, например 710! 7",
-        "pt": "Suportar métodos de endereçamento individuais, p. 710! 7",
-        "nl": "Ondersteuning van individuele adresseringsmethoden, b.v. 710! 7",
-        "fr": "Soutenir les méthodes d'adressage individuelles, par ex. 710! 7",
-        "it": "Supportare i singoli metodi di indirizzamento, ad es. 710! 7",
-        "es": "Apoya los métodos de direccionamiento individual, p. 710! 7",
-        "pl": "Wspieraj indywidualne metody adresowania, np. 710! 7",
-        "uk": "Підтримуйте індивідуальні методи звернення, наприклад 710! 7",
-        "zh-cn": "支持单个解决方法，例如710！7"
-      },
       "0.3.2": {
         "en": "Support dot-separated parameters",
         "de": "Unterstützung für Punkt-separierte Parameter",
@@ -153,7 +140,7 @@
     ],
     "globalDependencies": [
       {
-        "admin": ">=7.0.23"
+        "admin": ">=7.6.20"
       }
     ]
   },
