@@ -95,7 +95,7 @@ The BSB_LAN Interface brings the BSB (Boiler System Bus) to LAN. This adapter co
 ## License
 MIT License
 
-Copyright (c) 2025 hacki11
+Copyright (c) 2026 hacki11
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
