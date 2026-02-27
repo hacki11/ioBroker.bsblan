@@ -88,7 +88,6 @@
   },
   "dependencies": {
     "@iobroker/adapter-core": "^3.3.2",
-    "chai": "^6.2.2",
     "p-queue": "^9.1.0",
     "promise-request-retry": "^1.0.2",
     "request": "^2.88.2",
