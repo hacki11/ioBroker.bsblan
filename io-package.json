@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "bsblan",
-    "version": "0.4.0",
+    "version": "1.0.0",
     "news": {
+      "1.0.0": {
+        "en": "Breaking Change: Set your password in the adapter config again due to enabled encryption",
+        "de": "Veränderung: Setzen Sie Ihr Passwort im Adapter config erneut durch die aktivierte Verschlüsselung",
+        "ru": "Переломные изменения: Установите пароль в конфигурации адаптера снова благодаря включенному шифрованию",
+        "pt": "Quebrar a Mudança: Configure sua senha na configuração do adaptador novamente devido à criptografia habilitada",
+        "nl": "Verandering doorbreken: Uw wachtwoord opnieuw instellen in de configuratie van de adapter vanwege ingeschakelde encryptie",
+        "fr": "Briser le changement : Définissez à nouveau votre mot de passe dans la configuration de l'adaptateur en raison du chiffrement activé",
+        "it": "Cambiamento di rottura: Impostare nuovamente la password nella configurazione dell'adattatore grazie alla crittografia abilitata",
+        "es": "Cambio de ruptura: Establecer su contraseña en el configuración del adaptador de nuevo debido a la encriptación habilitada",
+        "pl": "Łamanie zmian: Ustaw hasło w konfiguratorze adaptera ponownie z powodu włączonego szyfrowania",
+        "uk": "Зміна несправностей: Встановити пароль в налаштування адаптера знову за рахунок ввімкненого шифрування",
+        "zh-cn": "中断更改 : 由于启用加密, 在适配器配置中再次设置您的密码"
+      },
       "0.4.0": {
         "en": "Maintenance release\nSetup Eslint 9, Prettier and Dev Container\nMigrate to newest adapter-creator version\nUpdate dependencies",
         "de": "Freigabe der Wartung\nSetup Eslint 9, Prettier und Dev Container\nMigration auf neueste Adapter-Kreator-Version\nAbhängigkeiten aktualisieren",

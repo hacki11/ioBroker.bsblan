@@ -43,7 +43,7 @@ The BSB_LAN Interface brings the BSB (Boiler System Bus) to LAN. This adapter co
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 1.0.0 (2026-02-28)
 * Breaking Change: Set your password in the adapter config again due to enabled encryption
 
 ### 0.4.0 (2026-02-27)

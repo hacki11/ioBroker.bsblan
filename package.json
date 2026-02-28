@@ -1,6 +1,6 @@
 {
   "name": "iobroker.bsblan",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "description": "Connects the BSB_LAN Interface with ioBroker",
   "author": {
     "name": "hacki11",
