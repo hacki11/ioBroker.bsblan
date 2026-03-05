@@ -115,7 +115,7 @@
     "chai": "^6.2.2",
     "chai-as-promised": "^8.0.2",
     "mocha": "^11.7.5",
-    "sinon": "^21.0.1",
+    "sinon": "^21.0.2",
     "sinon-chai": "^4.0.1"
   },
   "main": "main.js",
